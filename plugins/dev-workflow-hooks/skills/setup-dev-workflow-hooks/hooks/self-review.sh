@@ -54,7 +54,11 @@ Check for:
    suggest squashing them into the relevant commit before merging.
 
 Report findings and suggest fixes if needed.
-After the subagent review, if issues are found, create follow-up commits to address them.'
+After the subagent review, if issues are found, create follow-up commits to address them.
+
+If working in a git worktree (i.e., the working directory is under .claude/worktrees/),
+use `git -C <worktree-path>` for all git commands instead of `cd <path> && git`.
+Also avoid chaining commands with `&&` where possible — run each command separately.'
 
 jq -n --arg reason "$review_prompt" '{
   "decision": "block",
