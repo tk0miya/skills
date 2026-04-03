@@ -20,6 +20,11 @@
       "name": "dev-workflow-hooks",
       "description": "開発ワークフロー向け Claude Code hooks をセットアップする",
       "source": "./plugins/dev-workflow-hooks"
+    },
+    {
+      "name": "init-typescript-project",
+      "description": "TypeScript プロジェクトの初期セットアップを自動化する",
+      "source": "./plugins/init-typescript-project"
     }
   ]
 }
