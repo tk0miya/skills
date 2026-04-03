@@ -1,0 +1,5 @@
+{
+  "name": "init-typescript-project",
+  "description": "TypeScript プロジェクトの初期セットアップを自動化する",
+  "version": "0.1.0"
+}
