@@ -75,7 +75,6 @@ npx biome init
 
 | プレースホルダー | 置換値 |
 |---|---|
-| `{{PROJECT_NAME}}` | Phase 0 で入力したプロジェクト名 |
 | `{{NODE_VERSION}}` | Phase 0 で入力した対象 Node.js バージョン |
 
 #### 配置先
@@ -89,6 +88,7 @@ npx biome init
 | `vscode/extensions.json` | `.vscode/extensions.json` |
 | `workflows/ci.yml` | `.github/workflows/ci.yml` |
 | `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` |
+| `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` |
 | `workflows/actionlint.yml` | `.github/workflows/actionlint.yml` |
 | `dependabot.yml` | `.github/dependabot.yml` |
 

@@ -84,8 +84,7 @@ bundle init
 
 | プレースホルダー | 置換値 |
 |---|---|
-| `{{PROJECT_NAME}}` | Phase 0 で入力したプロジェクト名 |
-| `{{PROJECT_NAME_SNAKE}}` | `{{PROJECT_NAME}}` のハイフンをアンダースコアに変換したもの（例: `my-awesome-gem` → `my_awesome_gem`） |
+| `{{PROJECT_NAME_SNAKE}}` | プロジェクト名のハイフンをアンダースコアに変換したもの（例: `my-awesome-gem` → `my_awesome_gem`） |
 | `{{RUBY_VERSION}}` | Phase 0 で入力した対象 Ruby バージョン（最小バージョン） |
 | `{{RUBY_VERSIONS}}` | Phase 0 で入力したサポートバージョン一覧を JSON 配列形式に変換したもの（例: `["3.2", "3.3", "3.4"]`）。gem を作る場合のみ使用 |
 
@@ -103,6 +102,7 @@ bundle init
 | `dependabot.yml` | `.github/dependabot.yml` | 常時 |
 | `workflows/rbs_collection.yml` | `.github/workflows/rbs_collection.yml` | 常時 |
 | `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` | 常時 |
+| `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` | 常時 |
 | `workflows/release.yml` | `.github/workflows/release.yml` | gem を作る場合のみ |
 | `workflows/actionlint.yml` | `.github/workflows/actionlint.yml` | 常時 |
 
