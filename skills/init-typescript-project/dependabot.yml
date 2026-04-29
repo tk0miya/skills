@@ -15,3 +15,7 @@ updates:
       timezone: "Asia/Tokyo"
     cooldown:
       default-days: 3
+    ignore:
+      # Ignore non-LTS Node.js versions (odd numbers are not LTS)
+      - dependency-name: "@types/node"
+        versions: ["25.x", "27.x", "29.x", "31.x", "33.x"]
