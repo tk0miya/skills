@@ -1,0 +1,45 @@
+name: Biome migrate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package-lock.json"
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.REPO_HOUSEKEEPER_APP_ID }}
+          private-key: ${{ secrets.REPO_HOUSEKEEPER_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run biome migrate
+        run: npx biome migrate --write
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: chore/biome-migrate
+          delete-branch: true
+          commit-message: "chore: run biome migrate"
+          title: "chore: run biome migrate"
+          body: |
+            Diff produced by running `biome migrate --write` to keep the configuration in sync with the installed `@biomejs/biome` version.
+          labels: auto-merge

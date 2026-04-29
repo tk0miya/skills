@@ -90,6 +90,7 @@ npx biome init
 | `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` |
 | `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` |
 | `workflows/actionlint.yml` | `.github/workflows/actionlint.yml` |
+| `workflows/biome-migrate.yml` | `.github/workflows/biome-migrate.yml` |
 | `dependabot.yml` | `.github/dependabot.yml` |
 
 設定ファイルの配置後、`setup-dev-workflow-hooks` スキルを実行して開発ワークフロー向け hooks をセットアップする。

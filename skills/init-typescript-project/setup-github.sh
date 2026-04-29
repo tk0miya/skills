@@ -58,4 +58,10 @@ gh secret set PR_AUTO_MERGER_PRIVATE_KEY --app dependabot \
   --body "$(cat ~/Dropbox/Personal/secrets/pull-request-auto-merging-bot.private-key.pem)" \
   --repo "$REPO"
 
+echo "==> Setting up REPO_HOUSEKEEPER"
+gh variable set REPO_HOUSEKEEPER_APP_ID --body "412513" --repo "$REPO"
+gh secret set REPO_HOUSEKEEPER_PRIVATE_KEY \
+  --body "$(cat ~/Dropbox/Personal/secrets/rbs_collection_updater.private-key.pem)" \
+  --repo "$REPO"
+
 echo "==> Done: ${REPO}"
