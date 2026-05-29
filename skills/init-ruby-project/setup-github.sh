@@ -35,9 +35,9 @@ gh repo create "$PROJECT_NAME" "--${VISIBILITY}" --source=. --push
 
 echo "==> Creating branch ruleset"
 if [[ -n "$RUBY_VERSIONS" ]]; then
-  STATUS_CHECKS=$(echo "$RUBY_VERSIONS" | tr ' ' '\n' | jq -R '{"context": ("Ruby " + .)}' | jq -s '. + [{"context": "actionlint"}]')
+  STATUS_CHECKS=$(echo "$RUBY_VERSIONS" | tr ' ' '\n' | jq -R '{"context": ("Ruby " + .)}' | jq -s '. + [{"context": "actionlint"}, {"context": "zizmor"}]')
 else
-  STATUS_CHECKS='[{"context": "test"}, {"context": "actionlint"}]'
+  STATUS_CHECKS='[{"context": "test"}, {"context": "actionlint"}, {"context": "zizmor"}]'
 fi
 
 jq -n --argjson checks "$STATUS_CHECKS" '{
