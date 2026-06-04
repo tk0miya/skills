@@ -45,3 +45,7 @@ Installs Claude Code hooks tailored for Ruby projects (rbs-inline, pre-commit ch
 ### setup-dev-workflow-hooks
 
 Installs Claude Code hooks for general development workflow (self-review, etc.).
+
+### setup-github-workflows
+
+Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), a base Dependabot config, and branch protection for a repository. Run once on an existing repository whose default branch is not yet protected.
