@@ -84,6 +84,7 @@ npx biome init
 | `tsconfig.json.tmpl` | `tsconfig.json` |
 | `vitest.config.ts.tmpl` | `vitest.config.ts` |
 | `gitignore.tmpl` | `.gitignore` |
+| `npmrc.tmpl` | `.npmrc` |
 | `vscode/settings.json` | `.vscode/settings.json` |
 | `vscode/extensions.json` | `.vscode/extensions.json` |
 | `workflows/ci.yml` | `.github/workflows/ci.yml` |

@@ -36,6 +36,10 @@ bundle gem {PROJECT_NAME} --ci=github --test=rspec
 ```
 
 - gemspec の `required_ruby_version` を `">= {RUBY_VERSION}"` に更新する
+- Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する（公開直後の gem を一定期間使わない供給チェーン対策。Bundler 4.0.13+ が必要）:
+  ```ruby
+  source "https://rubygems.org", cooldown: 7
+  ```
 - Gemfile の `group :development` に以下を追加する:
   ```ruby
   gem "rake"
@@ -58,6 +62,10 @@ mkdir {PROJECT_NAME} && cd {PROJECT_NAME}
 bundle init
 ```
 
+- Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する（公開直後の gem を一定期間使わない供給チェーン対策。Bundler 4.0.13+ が必要）:
+  ```ruby
+  source "https://rubygems.org", cooldown: 7
+  ```
 - Gemfile に以下を追加する:
   ```ruby
   group :development do
