@@ -92,7 +92,7 @@ gh api "repos/${REPO}/actions/permissions/workflow" \
   --field can_approve_pull_request_reviews=true
 
 echo "==> Setting up PR_AUTO_MERGER"
-gh variable set PR_AUTO_MERGER_APP_ID --body "1239986" --repo "$REPO"
+gh variable set PR_AUTO_MERGER_CLIENT_ID --body "Iv23liInIOSVmvfZicez" --repo "$REPO"
 gh secret set PR_AUTO_MERGER_PRIVATE_KEY \
   --body "$(cat ~/Dropbox/Personal/secrets/pull-request-auto-merging-bot.private-key.pem)" \
   --repo "$REPO"
@@ -101,7 +101,7 @@ gh secret set PR_AUTO_MERGER_PRIVATE_KEY --app dependabot \
   --repo "$REPO"
 
 echo "==> Setting up REPO_HOUSEKEEPER"
-gh variable set REPO_HOUSEKEEPER_APP_ID --body "412513" --repo "$REPO"
+gh variable set REPO_HOUSEKEEPER_CLIENT_ID --body "Iv1.11115f090b79bb10" --repo "$REPO"
 gh secret set REPO_HOUSEKEEPER_PRIVATE_KEY \
   --body "$(cat ~/Dropbox/Personal/secrets/repo-housekeeper.private-key.pem)" \
   --repo "$REPO"

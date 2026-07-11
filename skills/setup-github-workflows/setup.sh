@@ -17,7 +17,7 @@
 #   setup.sh --repo OWNER/NAME
 #
 # Owner-specific values can be overridden via environment variables:
-#   PR_AUTO_MERGER_APP_ID            (default: 1239986)
+#   PR_AUTO_MERGER_CLIENT_ID         (default: Iv23liInIOSVmvfZicez)
 #   PR_AUTO_MERGER_PRIVATE_KEY_PATH  (default: ~/Dropbox/Personal/secrets/pull-request-auto-merging-bot.private-key.pem)
 
 set -euo pipefail
@@ -37,7 +37,7 @@ done
 
 [[ -z "$REPO" ]] && usage
 
-APP_ID="${PR_AUTO_MERGER_APP_ID:-1239986}"
+CLIENT_ID="${PR_AUTO_MERGER_CLIENT_ID:-Iv23liInIOSVmvfZicez}"
 KEY_PATH="${PR_AUTO_MERGER_PRIVATE_KEY_PATH:-$HOME/Dropbox/Personal/secrets/pull-request-auto-merging-bot.private-key.pem}"
 
 echo "==> Updating repository settings"
@@ -99,7 +99,7 @@ gh api "repos/${REPO}/actions/permissions/workflow" \
   --field can_approve_pull_request_reviews=true
 
 echo "==> Setting up PR_AUTO_MERGER"
-gh variable set PR_AUTO_MERGER_APP_ID --body "$APP_ID" --repo "$REPO"
+gh variable set PR_AUTO_MERGER_CLIENT_ID --body "$CLIENT_ID" --repo "$REPO"
 gh secret set PR_AUTO_MERGER_PRIVATE_KEY \
   --body "$(cat "$KEY_PATH")" \
   --repo "$REPO"

@@ -54,7 +54,7 @@ owner 固有の値は環境変数で上書きできる:
 
 | 環境変数 | デフォルト |
 |---|---|
-| `PR_AUTO_MERGER_APP_ID` | `1239986` |
+| `PR_AUTO_MERGER_CLIENT_ID` | `Iv23liInIOSVmvfZicez` |
 | `PR_AUTO_MERGER_PRIVATE_KEY_PATH` | `~/Dropbox/Personal/secrets/pull-request-auto-merging-bot.private-key.pem` |
 
 `setup.sh` が構成する内容:
@@ -82,4 +82,4 @@ owner 固有の値は環境変数で上書きできる:
 実行完了後に以下をチェックリスト形式で出力する（`setup.sh` で自動化されない、事前の手作業）。
 
 - [ ] GitHub App「PR auto merger」が存在し、対象リポジトリにインストールされていること
-      （App ID は `setup.sh` の `PR_AUTO_MERGER_APP_ID` と一致させる）
+      （Client ID は `setup.sh` の `PR_AUTO_MERGER_CLIENT_ID` と一致させる）
