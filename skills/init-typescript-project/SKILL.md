@@ -36,6 +36,12 @@ npm init -y
 
 生成された `package.json` に以下を追記・修正する:
 - `"type": "module"` を追加
+- `imports` に以下を設定（subpath imports で `src/` を参照する）:
+  ```json
+  {
+    "#/*": "./src/*"
+  }
+  ```
 - `scripts` に以下を設定:
   ```json
   {
