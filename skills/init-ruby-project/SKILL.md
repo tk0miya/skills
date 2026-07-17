@@ -143,8 +143,6 @@ ASCII 順を維持した適切な箇所に追記:
 
 `setup-ruby-hooks` スキルを実行して Claude Code hooks をセットアップする。
 
-`setup-dev-workflow-hooks` スキルを実行して開発ワークフロー向け hooks をセットアップする。
-
 ## Phase 3: GitHub 操作（GitHub リポジトリ作成を選んだ場合のみ）
 
 このスキルが配置されているディレクトリ（`skills/init-ruby-project/`）の `setup-github.sh` を実行する。
