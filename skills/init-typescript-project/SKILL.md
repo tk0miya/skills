@@ -100,8 +100,6 @@ npx biome init
 | `workflows/biome-migrate.yml` | `.github/workflows/biome-migrate.yml` |
 | `dependabot.yml` | `.github/dependabot.yml` |
 
-設定ファイルの配置後、`setup-dev-workflow-hooks` スキルを実行して開発ワークフロー向け hooks をセットアップする。
-
 ## Phase 3: GitHub 操作（GitHub リポジトリ作成を選んだ場合のみ）
 
 このスキルが配置されているディレクトリ（`skills/init-typescript-project/`）の `setup-github.sh` を実行する。
