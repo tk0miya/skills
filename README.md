@@ -46,6 +46,10 @@ Installs Claude Code hooks tailored for Ruby projects (rbs-inline, pre-commit ch
 
 Installs Claude Code hooks for general development workflow (self-review, etc.).
 
+### self-review
+
+Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus language/framework-specific perspectives (e.g. RSpec for Ruby), loaded additively based on the detected stack, and loops on fixes until the review passes. Add a language/framework by dropping a `references/<name>.md` into the skill.
+
 ### setup-github-workflows
 
 Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), a base Dependabot config, and branch protection for a repository. Run once on an existing repository whose default branch is not yet protected.
