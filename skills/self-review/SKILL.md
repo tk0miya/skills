@@ -1,6 +1,7 @@
 ---
 name: self-review
 description: これからコミットする変更をセルフレビューする。
+license: Apache-2.0
 context: fork
 agent: Explore
 ---

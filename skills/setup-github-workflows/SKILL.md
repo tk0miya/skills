@@ -1,6 +1,7 @@
 ---
 name: setup-github-workflows
 description: 言語非依存の汎用 GitHub Actions / Dependabot 設定とブランチ保護をセットアップする
+license: Apache-2.0
 ---
 
 # setup-github-workflows
