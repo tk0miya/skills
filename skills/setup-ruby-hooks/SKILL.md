@@ -1,6 +1,7 @@
 ---
 name: setup-ruby-hooks
 description: Ruby プロジェクトに Claude Code hooks をセットアップする
+license: Apache-2.0
 ---
 
 # setup-ruby-hooks

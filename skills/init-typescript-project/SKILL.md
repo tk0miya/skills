@@ -1,6 +1,7 @@
 ---
 name: init-typescript-project
 description: TypeScript プロジェクトの初期セットアップを自動化する
+license: Apache-2.0
 disable-model-invocation: true
 ---
 

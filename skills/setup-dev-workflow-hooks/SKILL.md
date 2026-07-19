@@ -1,6 +1,7 @@
 ---
 name: setup-dev-workflow-hooks
 description: 開発ワークフロー向け Claude Code hooks をセットアップする
+license: Apache-2.0
 ---
 
 # setup-dev-workflow-hooks
