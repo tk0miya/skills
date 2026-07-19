@@ -1,15 +1,17 @@
 #!/bin/bash
 #
-# PostToolUse hook for self-review after git push
+# PreToolUse hook: review code before `git commit`.
 #
-# This script triggers a self-review process after git push operations.
-# The output is fed back to Claude via JSON, prompting it to perform
-# a code review.
+# Fires before a Bash `git commit` command and blocks the first commit attempt
+# for a given change-set, asking Claude to review the code before committing.
+# The review uses the `self-review` skill when available, and falls back to the
+# bundled `code-review` skill otherwise — so the hook works even in projects
+# that don't ship the custom self-review skill.
 #
-# NOTE: PostToolUse hooks with exit code 0 only show plain text stdout
-# in verbose mode. To ensure Claude receives the message, we output JSON
-# with "decision": "block" and "reason", which Claude Code delivers as
-# a system-reminder.
+# A per-change-set marker (keyed by a hash of the diff, stored under .git/)
+# prevents an infinite block loop: once a change-set has been surfaced for
+# review, the matching commit is allowed through. If the review leads to fixes,
+# the diff changes, so the new state is reviewed once more before it commits.
 #
 
 set -euo pipefail
@@ -20,49 +22,74 @@ input=$(cat)
 tool_name=$(echo "$input" | jq -r '.tool_name // empty')
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 
-# Only run for Bash tool
+# Only gate the Bash tool running a git commit.
 if [[ "$tool_name" != "Bash" ]]; then
   exit 0
 fi
-
-# Check if it's a git push command
-if [[ ! "$command" =~ git[[:space:]]+push ]]; then
+# Match the `commit` subcommand, allowing an optional `git -C <path>` prefix
+# (the convention the self-review skill uses for worktrees). Other git global
+# options before the subcommand are unlikely here and intentionally not handled.
+# `git` must sit at a command boundary (start of the string, or after a shell
+# separator) so that a literal "git commit" inside an echo/grep argument does
+# not trigger the hook. The pattern lives in a variable so `[[` does not try to
+# parse its parentheses as shell syntax.
+commit_re='(^|[;&|(])[[:space:]]*git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit([[:space:]]|$)'
+if [[ ! "$command" =~ $commit_re ]]; then
   exit 0
 fi
 
-# Check if push was successful (field may not exist; default to 0)
-exit_code=$(echo "$input" | jq -r '.tool_response.exit_code // 0')
+# If the command targets a specific repo via `git -C <path>`, operate there too.
+work_dir="."
+if [[ "$command" =~ git[[:space:]]+-C[[:space:]]+([^[:space:]]+) ]]; then
+  work_dir="${BASH_REMATCH[1]}"
+fi
 
-if [[ "$exit_code" != "0" ]]; then
-  # Push failed, no need for review
+# Not a git repo → nothing to do.
+git_dir=$(git -C "$work_dir" rev-parse --absolute-git-dir 2>/dev/null || true)
+if [[ -z "$git_dir" ]]; then
   exit 0
 fi
 
-# Output self-review prompt as JSON so Claude receives it
-review_prompt='SELF-REVIEW REQUIRED: A git push has been completed. Please use the Task tool with subagent_type Explore to perform a self-review of the changes. Use this prompt for the Explore subagent:
+# Hash the changes about to be committed. `git diff HEAD` covers both
+# `git add` + commit and `git commit -a`. Before the first commit HEAD is
+# absent, so fall back to the working state.
+if git -C "$work_dir" rev-parse --verify HEAD >/dev/null 2>&1; then
+  changeset=$(git -C "$work_dir" diff HEAD)
+else
+  changeset=$(git -C "$work_dir" status --porcelain; git -C "$work_dir" diff; git -C "$work_dir" diff --cached)
+fi
 
-First, read CLAUDE.md to understand the project rules and conventions.
-Then review the recent git push. Run `git log origin/main..HEAD --stat` and
-`git diff origin/main...HEAD` to examine all changes from the branch point.
-Check for:
-1. Correctness: requirements met, logic errors, edge cases
-2. Code Quality: naming, readability, follows project conventions
-3. Testing: test coverage for new functionality
-4. Security: vulnerabilities, input validation
-5. Commit Quality: each commit should be a meaningful unit of work.
-   If there are minor fix commits (typos, forgotten changes, careless mistakes),
-   suggest squashing them into the relevant commit before merging.
+# Nothing to review (e.g. a message-only `--amend`) → let it proceed.
+if [[ -z "$changeset" ]]; then
+  exit 0
+fi
 
-Report findings and suggest fixes if needed.
-After the subagent review, if issues are found, create follow-up commits to address them.
+hash=$(printf '%s' "$changeset" | git hash-object --stdin)
+state_file="$git_dir/self-review-reviewed"
 
-If working in a git worktree (i.e., the working directory is under .claude/worktrees/),
-use `git -C <worktree-path>` for all git commands instead of `cd <path> && git`.
-Also avoid chaining commands with `&&` where possible — run each command separately.'
+# Already surfaced for review → allow the commit.
+if [[ -f "$state_file" ]] && grep -qxF "$hash" "$state_file"; then
+  exit 0
+fi
+
+# Record this change-set and block once to force a review first.
+echo "$hash" >> "$state_file"
+
+review_prompt='SELF-REVIEW REQUIRED before committing. Review the changes that are
+about to be committed BEFORE running git commit again:
+
+- If the `self-review` skill is available, invoke it (Skill tool, skill "self-review").
+- Otherwise, run the bundled `/code-review` skill on the working diff.
+
+If the review finds issues, fix them and review again. Once it is clean, run the same
+git commit command again to proceed — it will be allowed through.'
 
 jq -n --arg reason "$review_prompt" '{
-  "decision": "block",
-  "reason": $reason
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": $reason
+  }
 }'
 
 exit 0
