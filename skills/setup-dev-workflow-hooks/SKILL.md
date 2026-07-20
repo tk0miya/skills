@@ -6,9 +6,9 @@ license: Apache-2.0
 
 # setup-dev-workflow-hooks
 
-プロジェクトの `.claude/` ディレクトリに開発ワークフロー向け hooks の設定ファイルとスクリプトを配置するスキルです。
+プロジェクトの `.claude/` ディレクトリに開発ワークフロー向け hooks と permissions の設定ファイルとスクリプトを配置するスキルです。
 
-既に `.claude/settings.json` が存在する場合は、hooks の内容をマージする。
+既に `.claude/settings.json` が存在する場合は、hooks と permissions の内容をマージする。
 
 ## 実行内容（自動実行）
 
@@ -20,7 +20,7 @@ license: Apache-2.0
 |---|---|
 | `hooks/self-review.sh` | `.claude/hooks/self-review.sh` |
 
-`.claude/settings.json` が既に存在する場合は、`claude-settings.json` の hooks 定義をマージする。
+`.claude/settings.json` が既に存在する場合は、`claude-settings.json` の hooks 定義と `permissions.allow` をマージする（`permissions.allow` は重複を除いて既存の配列に追記する）。
 存在しない場合は `claude-settings.json` を `.claude/settings.json` としてコピーする。
 
 配置後、以下を実行してスクリプトに実行権限を付与する:
@@ -34,3 +34,9 @@ chmod +x .claude/hooks/self-review.sh
 | ファイル | タイミング | 役割 |
 |---|---|---|
 | `self-review.sh` | PreToolUse | `git commit` の前にコードレビューを起動する。`self-review` スキルがあればそれを、無ければバンドルスキルの `code-review` にフォールバックする。レビュー済みの変更セットはコミットを通す（無限ブロックを防ぐ） |
+
+### permissions の役割
+
+| ルール | 役割 |
+|---|---|
+| `RemoteTrigger` | Claude Code on the web でセルフチェックイン（「send later」）を毎回確認せず自動許可する |
