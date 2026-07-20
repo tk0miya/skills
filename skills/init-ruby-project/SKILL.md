@@ -142,7 +142,10 @@ ASCII 順を維持した適切な箇所に追記:
 /.gem_rbs_collection/
 ```
 
-`setup-ruby-hooks` スキルを実行して Claude Code hooks をセットアップする。
+### Claude Code hooks のセットアップ
+
+`setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks と permissions をセットアップする。
+続けて `setup-ruby-hooks` スキルを実行して Ruby 向けの Claude Code hooks をセットアップする。
 
 ## Phase 3: GitHub 操作（GitHub リポジトリ作成を選んだ場合のみ）
 
