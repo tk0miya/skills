@@ -22,6 +22,7 @@ agent: Explore
 | 判定材料 | 追加で読む観点 |
 |---|---|
 | `Gemfile` または `*.gemspec` がある | `references/ruby.md` |
+| `skills/**/*.md` を変更している | `references/skill.md` |
 
 ### 2. 変更をレビューする
 
