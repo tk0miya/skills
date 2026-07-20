@@ -12,7 +12,7 @@ Ruby プロジェクト（`Gemfile` / `*.gemspec` あり）で共通観点に加
 - **実行条件（「〜の場合」）を必ず `context` で表現**しているか。
 - **各 `context` の実行条件を実現・表現するように、その `context` 内で `before` / `let` を定義**しているか。
 - **1 つの `context` につき example は 1 つ**か（1 つの example 内に複数の `expect` を書くのは可）。
-- **example の説明には実行結果の期待値（「〜になること」「〜すること」）だけ**を書き、実行条件を含めていないか（条件は `context` 側に置く）。
+- **example の説明には実行結果の期待値（「〜になること」「〜すること」）だけ**を書き、実行条件を含めていないか（条件は `context` 側に置く）。ただし後述の `is_expected.to` ワンライナー集約に該当する場合は、説明を省略してよい。
 
 ### context のツリー構造
 
@@ -28,7 +28,8 @@ Ruby プロジェクト（`Gemfile` / `*.gemspec` あり）で共通観点に加
 
 ### 検証（expectation）
 
-- 検証は基本 **`expect(...).to`** で書き、example の説明を明示しているか。`is_expected.to` は**ごくシンプルなケースのみ**許容する。
+- 検証は基本 **`expect(...).to`** で書き、example の説明で期待結果を明示しているか。
+- ただし **`expect` 文が 1 行で収まり、なおかつ example の説明が検証内容の単なる言い換えになる場合は、`is_expected.to` のワンライナーに集約**しているか。説明と検証内容が重複するため、`it { is_expected.to ... }` の形にまとめる。
 
 ### 望ましい形
 
@@ -56,7 +57,19 @@ RSpec.describe Calculator do
       end
     end
   end
+
+  describe "#positive?" do
+    subject { calculator.positive?(value) }
+
+    let(:calculator) { Calculator.new }
+
+    context "when the value is greater than zero" do
+      let(:value) { 1 }
+
+      it { is_expected.to be_truthy }
+    end
+  end
 end
 ```
 
-テスト対象の呼び出しは `subject` に集約し、実行条件は `context` に、期待結果は `it` に分離している。
+テスト対象の呼び出しは `subject` に集約し、実行条件は `context` に、期待結果は `it` に分離している。`#positive?` の example のように、`expect` 文が 1 行で収まり説明が検証内容の言い換えにしかならない場合は、`it { is_expected.to ... }` のワンライナーに集約する。
