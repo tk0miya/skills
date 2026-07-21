@@ -2,6 +2,36 @@
 
 Ruby プロジェクト（`Gemfile` / `*.gemspec` あり）で共通観点に加算する。
 
+## 属性へのアクセス
+
+クラスを定義する際、以下を確認する。
+
+- **属性へのアクセスは `attr_reader` / `attr_writer` / `attr_accessor` で定義したアクセサを介す**ことを原則としているか。とくに属性を参照する際は、インスタンス変数（`@foo`）を直接読まず `attr_reader` 経由で参照しているか。
+- **インスタンス変数への直接アクセスは最低限に留めて**いるか。直接アクセスが許容されるのは、`#initialize` での初期化、メモ化（`@foo ||= ...`）、状態更新メソッドでの代入など、アクセサでは表現できない箇所に限る。
+
+### 望ましい形
+
+```ruby
+class User
+  attr_reader :name, :email
+
+  def initialize(name, email)
+    @name = name    # #initialize での初期化は直接代入でよい
+    @email = email
+  end
+
+  def greeting
+    "Hello, #{name}"    # 参照は attr_reader 経由（@name ではなく name）
+  end
+
+  def display_name
+    @display_name ||= name.upcase    # メモ化は直接アクセスでよい
+  end
+end
+```
+
+参照は `attr_reader` 経由で行い、インスタンス変数への直接アクセスは初期化・メモ化・状態更新に限定している。
+
 ## RSpec の書き方
 
 以下の規約に沿って書けているかを確認する。
