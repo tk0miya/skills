@@ -97,7 +97,7 @@ npx biome init
 | `workflows/ci.yml` | `.github/workflows/ci.yml` |
 | `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` |
 | `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` |
-| `workflows/actionlint.yml` | `.github/workflows/actionlint.yml` |
+| `workflows/workflow-lint.yml` | `.github/workflows/workflow-lint.yml` |
 | `workflows/biome-migrate.yml` | `.github/workflows/biome-migrate.yml` |
 | `dependabot.yml` | `.github/dependabot.yml` |
 
