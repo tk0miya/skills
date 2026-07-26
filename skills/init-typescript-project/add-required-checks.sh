@@ -1,0 +1,1 @@
+../setup-github-workflows/add-required-checks.sh

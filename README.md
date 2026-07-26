@@ -30,13 +30,26 @@ Sets up the following automatically:
 
 - Scaffolding for a gem or a plain Ruby project
 - RuboCop / Steep configuration files
-- GitHub Actions workflows (test, Dependabot, auto-merge, release)
+- Ruby-specific GitHub Actions workflows (CI, rbs_collection, release) and Dependabot config (bundler)
 - VSCode settings
-- GitHub repository creation and branch protection rules
+- GitHub repository creation
+
+Delegates the language-agnostic GitHub setup to `setup-github-workflows`, which must also be
+installed.
 
 ### init-typescript-project
 
 Automates the initial setup of a TypeScript project.
+
+Sets up the following automatically:
+
+- Scaffolding, tsconfig / Biome / Vitest configuration files
+- TypeScript-specific GitHub Actions workflows (CI, biome-migrate) and Dependabot config (npm)
+- VSCode settings
+- GitHub repository creation
+
+Delegates the language-agnostic GitHub setup to `setup-github-workflows`, which must also be
+installed.
 
 ### setup-ruby-hooks
 
@@ -52,4 +65,6 @@ Single source of truth for code-review perspectives. Just before committing, it 
 
 ### setup-github-workflows
 
-Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), a base Dependabot config, and branch protection for a repository. Run once on an existing repository whose default branch is not yet protected.
+Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), the `github-actions` Dependabot update config (merged into an existing `dependabot.yml` if present), branch protection, and the project-wide GitHub App credentials for a repository. Run it once per repository, right after creating and pushing it.
+
+This is the single source of truth for that setup: the `init-*` skills delegate to it rather than shipping their own copies. Each side registers its own status checks into the same `main` ruleset, which is created by whichever call reaches it first.

@@ -11,7 +11,7 @@ TypeScript プロジェクトの初期セットアップを自動化するスキ
 
 ## 事前チェック（自動実行）
 
-以下を実行し、必要なコマンドが利用可能かチェックする。失敗した場合はエラーメッセージを表示して処理を中断する。
+以下を実行し、`gh` が認証済みか、`node` が利用可能かチェックする。
 
 ```bash
 gh auth status
@@ -95,9 +95,6 @@ npx biome init
 | `vscode/settings.json` | `.vscode/settings.json` |
 | `vscode/extensions.json` | `.vscode/extensions.json` |
 | `workflows/ci.yml` | `.github/workflows/ci.yml` |
-| `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` |
-| `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` |
-| `workflows/workflow-lint.yml` | `.github/workflows/workflow-lint.yml` |
 | `workflows/biome-migrate.yml` | `.github/workflows/biome-migrate.yml` |
 | `dependabot.yml` | `.github/dependabot.yml` |
 
@@ -107,11 +104,40 @@ npx biome init
 
 ## Phase 3: GitHub 操作（GitHub リポジトリ作成を選んだ場合のみ）
 
-このスキルが配置されているディレクトリ（`skills/init-typescript-project/`）の `setup-github.sh` を実行する。
+### 1. 初回コミット
+
+`gh repo create --push` はコミットが 1 つも無いと失敗するため、ここまでに生成した
+ファイルをすべてコミットする。
 
 ```bash
-bash {SKILL_DIR}/setup-github.sh --project-name {PROJECT_NAME} --visibility {VISIBILITY}
+set -e
+[[ -d .git ]] || git init
+git add -A
+git diff --cached --quiet || git commit -m "Initial commit"
+[[ "$(git symbolic-ref -q --short HEAD)" == "main" ]] || git branch -m main   # ワークフローが main 固定
 ```
+
+### 2. リポジトリ作成
+
+```bash
+gh repo create {PROJECT_NAME} --{VISIBILITY} --source=. --push
+```
+
+### 3. TypeScript の CI を required status checks に登録
+
+`ci.yml` のジョブ `test` を required status checks に足す。
+
+```bash
+bash {SKILL_DIR}/add-required-checks.sh \
+  --repo "$(gh repo view --json nameWithOwner -q .nameWithOwner)" \
+  --add-check "test"
+```
+
+### 4. 言語非依存の GitHub セットアップ
+
+`setup-github-workflows` スキルを実行する。`auto-merge` ラベル・`PR_AUTO_MERGER_*` /
+`REPO_HOUSEKEEPER_*` の登録と、`actionlint` / `zizmor` の required 追加は同スキルが行う。
+失敗した場合は同スキルの前提条件を確認して再実行する。
 
 ## Phase 4: 手動対応チェックリストの出力
 

@@ -11,7 +11,7 @@ Ruby プロジェクトの初期セットアップを自動化するスキルで
 
 ## 事前チェック（自動実行）
 
-以下を実行し、gh コマンドが利用可能かチェックする。失敗した場合はエラーメッセージを表示して処理を中断する。
+以下を実行し、`gh` が認証済みかチェックする。
 
 ```bash
 gh auth status
@@ -109,13 +109,10 @@ bundle init
 | `Steepfile` | `Steepfile` | 常時 |
 | `Rakefile` | `Rakefile` | 常時（gem の場合は既存ファイルに `ci` タスクを追記） |
 | `workflows/ci.yml` | `.github/workflows/ci.yml` | gem を作らない場合 |
-| `workflows/ci-gem.yml` | `.github/workflows/ci.yml` | gem を作る場合 |
+| `workflows/ci-gem.yml` | `.github/workflows/ci.yml` | gem を作る場合（`bundle gem --ci=github` が生成した `.github/workflows/main.yml` は削除する） |
 | `dependabot.yml` | `.github/dependabot.yml` | 常時 |
 | `workflows/rbs_collection.yml` | `.github/workflows/rbs_collection.yml` | 常時 |
-| `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` | 常時 |
-| `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` | 常時 |
 | `workflows/release.yml` | `.github/workflows/release.yml` | gem を作る場合のみ |
-| `workflows/workflow-lint.yml` | `.github/workflows/workflow-lint.yml` | 常時 |
 
 また、以下のテンプレートも配置する:
 
@@ -131,7 +128,8 @@ bundle exec rbs collection init
 bundle exec rbs collection install
 ```
 
-`.gitignore` の先頭に以下のコメントを挿入し、末尾に以下を追記する:
+`.gitignore` の先頭に以下のコメントを挿入し、末尾に以下を追記する（gem を作らない場合は
+`.gitignore` が生成されていないので、この内容で新規作成する）:
 
 先頭に挿入:
 ```
@@ -151,23 +149,50 @@ ASCII 順を維持した適切な箇所に追記:
 
 ## Phase 3: GitHub 操作（GitHub リポジトリ作成を選んだ場合のみ）
 
-このスキルが配置されているディレクトリ（`skills/init-ruby-project/`）の `setup-github.sh` を実行する。
+### 1. 初回コミット
 
-### gem を作らない場合
-
-```bash
-bash {SKILL_DIR}/setup-github.sh --project-name {PROJECT_NAME} --visibility {VISIBILITY}
-```
-
-### gem を作る場合
-
-`--ruby-versions` に Phase 0 で入力したサポートバージョン一覧をスペース区切りで渡す。
+`gh repo create --push` はコミットが 1 つも無いと失敗するため、ここまでに生成した
+ファイルをすべてコミットする。
 
 ```bash
-bash {SKILL_DIR}/setup-github.sh --project-name {PROJECT_NAME} --visibility {VISIBILITY} --ruby-versions "{RUBY_VERSIONS_SPACE_SEPARATED}"
+set -e
+[[ -d .git ]] || git init
+git add -A
+git diff --cached --quiet || git commit -m "Initial commit"
+[[ "$(git symbolic-ref -q --short HEAD)" == "main" ]] || git branch -m main   # ワークフローが main 固定
 ```
 
-例: `"3.2 3.3 3.4"` を渡すと `required_status_checks` に `"Ruby 3.2"`・`"Ruby 3.3"`・`"Ruby 3.4"` が設定される。
+### 2. リポジトリ作成
+
+```bash
+gh repo create {PROJECT_NAME} --{VISIBILITY} --source=. --push
+```
+
+### 3. Ruby の CI を required status checks に登録
+
+`ci.yml` のジョブを required status checks に足す。gem を作ったかどうかで渡す context が
+変わるので、**どちらか一方**を実行する。
+
+```bash
+# gem を作らない場合（ci.yml のジョブ ID は test）
+bash {SKILL_DIR}/add-required-checks.sh \
+  --repo "$(gh repo view --json nameWithOwner -q .nameWithOwner)" \
+  --add-check "test"
+```
+
+```bash
+# gem を作る場合（ci.yml は name: Ruby ${{ matrix.ruby-version }}）
+# Phase 0 で入力したサポートバージョンごとに --add-check を並べる
+bash {SKILL_DIR}/add-required-checks.sh \
+  --repo "$(gh repo view --json nameWithOwner -q .nameWithOwner)" \
+  --add-check "Ruby 3.2" --add-check "Ruby 3.3" --add-check "Ruby 3.4"
+```
+
+### 4. 言語非依存の GitHub セットアップ
+
+`setup-github-workflows` スキルを実行する。`auto-merge` ラベル・`PR_AUTO_MERGER_*` /
+`REPO_HOUSEKEEPER_*` の登録と、`actionlint` / `zizmor` の required 追加は同スキルが行う。
+失敗した場合は同スキルの前提条件を確認して再実行する。
 
 ## Phase 4: 手動対応チェックリストの出力
 
