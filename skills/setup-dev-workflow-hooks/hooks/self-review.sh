@@ -13,6 +13,12 @@
 # review, the matching commit is allowed through. If the review leads to fixes,
 # the diff changes, so the new state is reviewed once more before it commits.
 #
+# When the project also installs a `.claude/hooks/pre-commit-check.sh`, the
+# review is ordered after those checks: reviewing a change-set that the checks
+# are about to send back for fixes is wasted work. All PreToolUse hooks run in
+# parallel, so their order in settings.json cannot sequence them — instead this
+# hook waits for the check hook to record the change-set as passing.
+#
 
 set -euo pipefail
 
@@ -66,10 +72,52 @@ if [[ -f "$state_file" ]] && grep -qxF "$hash" "$state_file"; then
   exit 0
 fi
 
+# Deny the commit, telling Claude what to do before retrying.
+deny() {
+  jq -n --arg reason "$1" '{
+    "hookSpecificOutput": {
+      "hookEventName": "PreToolUse",
+      "permissionDecision": "deny",
+      "permissionDecisionReason": $reason
+    }
+  }'
+  exit 0
+}
+
+# Wait for the check hook's verdict, recorded under .git/ per change-set. A
+# recorded failure keeps the review deferred for as long as it stands. With no
+# verdict either way the wait is capped at one attempt per change-set, so a check
+# hook that records nothing still lets the commit through the review and on.
+check_hook="${CLAUDE_PROJECT_DIR:-$work_dir}/.claude/hooks/pre-commit-check.sh"
+passed_file="$git_dir/pre-commit-check-passed"
+failed_file="$git_dir/pre-commit-check-failed"
+deferred_file="$git_dir/self-review-check-deferred"
+recorded_in() {
+  [[ -f "$1" ]] && grep -qxF "$hash" "$1"
+}
+if [[ -f "$check_hook" ]] && ! recorded_in "$passed_file"; then
+  if recorded_in "$deferred_file"; then
+    first_wait=no
+  else
+    first_wait=yes
+    echo "$hash" >> "$deferred_file"
+  fi
+
+  if [[ "$first_wait" == yes ]] || recorded_in "$failed_file"; then
+    deny 'PRE-COMMIT CHECKS COME FIRST. The self-review is requested once the project checks pass.
+
+The `pre-commit-check.sh` hook runs alongside this one on every commit attempt:
+
+- If it reported failures, fix them first.
+- Otherwise nothing needs fixing — run the same git commit command again, and the
+  self-review will be requested next.'
+  fi
+fi
+
 # Record this change-set and block once to force a review first.
 echo "$hash" >> "$state_file"
 
-review_prompt='SELF-REVIEW REQUIRED before committing. Review the changes that are
+deny 'SELF-REVIEW REQUIRED before committing. Review the changes that are
 about to be committed BEFORE running git commit again:
 
 - If the `self-review` skill is available, invoke it (Skill tool, skill "self-review").
@@ -77,13 +125,3 @@ about to be committed BEFORE running git commit again:
 
 If the review finds issues, fix them and review again. Once it is clean, run the same
 git commit command again to proceed — it will be allowed through.'
-
-jq -n --arg reason "$review_prompt" '{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "deny",
-    "permissionDecisionReason": $reason
-  }
-}'
-
-exit 0

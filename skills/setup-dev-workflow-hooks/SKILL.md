@@ -35,6 +35,22 @@ chmod +x .claude/hooks/self-review.sh
 |---|---|---|
 | `self-review.sh` | PreToolUse | `git commit` の前にコードレビューを起動する。`self-review` スキルがあればそれを、無ければバンドルスキルの `code-review` にフォールバックする。レビュー済みの変更セットはコミットを通す（無限ブロックを防ぐ） |
 
+### pre-commit check との実行順序
+
+プロジェクトに `.claude/hooks/pre-commit-check.sh`（`setup-ruby-hooks` などが配置する）がある場合、そのチェックが通ったあとにセルフレビューが動く。チェックで差し戻される変更をレビューしても無駄になるため。
+
+PreToolUse hooks は settings.json の並び順に関係なく並列実行されるので、順序は `pre-commit-check.sh` が変更セット単位で `.git/` に記録する結果で決まる。
+
+| 記録 | 書き込む側 | 意味 |
+|---|---|---|
+| `.git/pre-commit-check-passed` | `pre-commit-check.sh` | この変更セットはチェックを通った → セルフレビューを要求する |
+| `.git/pre-commit-check-failed` | `pre-commit-check.sh` | この変更セットはチェックで落ちた → 通るまでセルフレビューを保留する |
+| `.git/self-review-check-deferred` | `self-review.sh` | この変更セットで結果待ちを 1 回消費した → 失敗が記録されていなければ次の試行では待たない |
+
+結果がまだ出ていない初回のコミット試行では、いったんコミットを拒否して「同じコミットをもう一度実行する」よう伝える（並列実行のため、この時点ではチェックの結果を読めない）。この待ちは変更セットごとに 1 回までで、結果を記録しない `pre-commit-check.sh` を使っているプロジェクトでもコミットが詰まることはない。
+
+`pre-commit-check.sh` が無いプロジェクトでは、従来どおりチェックを待たずにレビューを要求する。
+
 ### permissions の役割
 
 | ルール | 役割 |
