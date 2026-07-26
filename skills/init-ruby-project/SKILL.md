@@ -50,6 +50,7 @@ bundle gem {PROJECT_NAME} --ci=github --test=rspec
   gem "rubocop"
   gem "rubocop-numbered-params"
   gem "rubocop-rake"
+  gem "rubocop-rbs_inline"
   gem "rubocop-rspec"
   gem "steep"
   ```
@@ -77,6 +78,7 @@ bundle init
     gem "rubocop"
     gem "rubocop-numbered-params"
     gem "rubocop-rake"
+    gem "rubocop-rbs_inline"
     gem "rubocop-rspec"
     gem "steep"
   end
@@ -113,7 +115,7 @@ bundle init
 | `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` | 常時 |
 | `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` | 常時 |
 | `workflows/release.yml` | `.github/workflows/release.yml` | gem を作る場合のみ |
-| `workflows/actionlint.yml` | `.github/workflows/actionlint.yml` | 常時 |
+| `workflows/workflow-lint.yml` | `.github/workflows/workflow-lint.yml` | 常時 |
 
 また、以下のテンプレートも配置する:
 
