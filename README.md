@@ -67,4 +67,4 @@ Single source of truth for code-review perspectives. Just before committing, it 
 
 Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), the `github-actions` Dependabot update config (merged into an existing `dependabot.yml` if present), branch protection, and the project-wide GitHub App credentials for a repository. Run it once per repository, right after creating and pushing it.
 
-This is the single source of truth for that setup: the `init-*` skills delegate to it rather than shipping their own copies. Each side registers its own status checks into the same `main` ruleset, which is created by whichever call reaches it first.
+This is the single source of truth for that setup: the `init-*` skills delegate to it rather than setting it up themselves. Each side registers its own status checks into the same `main` ruleset, which is created by whichever call reaches it first.
