@@ -42,6 +42,14 @@ end
 attr_reader :message #: String -- ユーザーに通知するメッセージ本文
 ```
 
+## 型定義（RBS）の依存管理
+
+Steep + rbs collection を使う構成で gem の型を利用する変更では、以下を確認する。
+
+- **`Steepfile` に `library` 行を追加していない**か。読み込む型は `rbs_collection.yaml` に一本化する。collection にある gem は Steep が `rbs_collection.lock.yaml` から自動で読み込むため、`library` の指定は不要。
+- **Gemfile.lock に載らない gem（stdlib / default gems / Gemfile 未宣言の bundled gems）の型を利用する場合、`rbs_collection.yaml` の `gems:` にエントリを追加**しているか。Gemfile.lock に載っている gem は `rbs collection install` が自動で解決するため追記は不要。
+- **`rbs_collection.yaml` を変更したなら、`rbs_collection.lock.yaml` も同じコミットに含まれている**か。`bundle exec rbs collection install` の実行漏れで lock ファイルが古いまま取り残されやすい。
+
 ## RSpec の書き方
 
 以下の規約に沿って書けているかを確認する。
