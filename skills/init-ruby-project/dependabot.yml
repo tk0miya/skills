@@ -10,11 +10,3 @@ updates:
       timezone: "Asia/Tokyo"
     cooldown:
       default-days: 7
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      timezone: "Asia/Tokyo"
-    cooldown:
-      default-days: 7
