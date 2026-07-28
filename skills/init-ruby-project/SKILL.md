@@ -72,7 +72,16 @@ bundle gem {PROJECT_NAME} --ci=github --test=rspec
 
 1. `required_ruby_version` を `">= {RUBY_VERSION}"` に更新する。
 
-2. `spec.files` の除外リスト（`f.start_with?(*%w[...])`）に開発用ファイルを追加する。
+   この gem が動作を保証する Ruby バージョンの宣言なので、Phase 0 で決めた対象バージョン（最小
+   サポートバージョン。`.rubocop.yml` の `TargetRubyVersion` と同じ値）を書く。Bundler がこの値を
+   依存解決の制約に使うため、`bundle install` より前に直す（雛形の既定値は対象と無関係な固定値なので、
+   そのままでは対象より緩いレンジを満たす古い依存で `Gemfile.lock` が固定される）。
+
+2. `spec.metadata["rubygems_mfa_required"] = "true"` を追記する。gem の公開に MFA を必須にする設定で、
+   RubyGems のアカウントが乗っ取られても不正なバージョンを公開されないようにする（cooldown と同じ
+   供給チェーン対策）。
+
+3. `spec.files` の除外リスト（`f.start_with?(*%w[...])`）に開発用ファイルを追加する。
    `bundle gem` が生成する除外リストは雛形時点のファイルしか対象にしておらず、そのままでは
    このスキルが配置する設定ファイルがすべてリリース物に含まれてしまう。
 
@@ -98,7 +107,7 @@ bundle gem {PROJECT_NAME} --ci=github --test=rspec
 
    `sig/` の型定義は利用者に配布したいので除外しない。
 
-3. 実体のない雛形コメントを削除する。
+4. 実体のない雛形コメントを削除する。
 
    - `# Uncomment to register a new dependency of your gem` と、続く
      `# spec.add_dependency "example-gem", "~> 1.0"`
@@ -155,7 +164,7 @@ bundle init
 | `spec/spec_helper.rb` | `spec/spec_helper.rb` | gem を作らない場合 |
 | `rubocop.yml` | `.rubocop.yml` | 常時 |
 | `Steepfile` | `Steepfile` | 常時 |
-| `Rakefile` | `Rakefile` | 常時（gem の場合は既存ファイルに `ci` タスクを追記） |
+| `Rakefile` | `Rakefile` | 常時（gem の場合も `bundle gem` が生成したものを上書きする） |
 | `workflows/ci.yml` | `.github/workflows/ci.yml` | gem を作らない場合 |
 | `workflows/ci-gem.yml` | `.github/workflows/ci.yml` | gem を作る場合（`bundle gem --ci=github` が生成した `.github/workflows/main.yml` は削除する） |
 | `dependabot.yml` | `.github/dependabot.yml` | 常時 |
@@ -206,6 +215,10 @@ ASCII 順を維持した適切な箇所に追記:
 雛形を実運用可能な状態にするまでが一続きの作業なので、意図的に 1 コミットにまとめている。
 セルフレビューがコミット粒度の分割を指摘した場合は、その指摘だけ採用せずにコミットする
 （粒度以外の指摘には通常どおり対応する）。
+
+gemspec の `summary` / `homepage` など、および `bundle gem` の README に残る TODO は、gem の中身が
+決まってから書くものなのでこの時点では埋めない。セルフレビューが雛形の TODO の残骸を指摘した場合も、
+その指摘だけ採用しない。
 
 ```bash
 set -e
