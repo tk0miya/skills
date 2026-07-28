@@ -11,11 +11,17 @@ Ruby プロジェクトの初期セットアップを自動化するスキルで
 
 ## 事前チェック（自動実行）
 
-以下を実行し、`gh` が認証済みかチェックする。
+以下を実行し、`gh` が認証済みか、Bundler が 4.0.13 以降かをチェックする。
 
 ```bash
 gh auth status
+bundle --version
 ```
+
+4.0.13 未満の Bundler は Phase 1 で付与する `cooldown`（公開直後の gem を一定期間使わない
+供給チェーン対策）を**黙って無視する**ため、cooldown の効かないプロジェクトができあがる。
+その場合は `gem install bundler` で更新してから再実行するようユーザーに伝えて中断する
+（ユーザーの環境を断りなく書き換えない）。
 
 ## Phase 0: ユーザーへの確認（必須・実行前に全項目を一度に質問する）
 
@@ -37,7 +43,7 @@ bundle gem {PROJECT_NAME} --ci=github --test=rspec
 ```
 
 - gemspec の `required_ruby_version` を `">= {RUBY_VERSION}"` に更新する
-- Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する（公開直後の gem を一定期間使わない供給チェーン対策。Bundler 4.0.13+ が必要）:
+- Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する:
   ```ruby
   source "https://rubygems.org", cooldown: 7
   ```
@@ -64,7 +70,7 @@ mkdir {PROJECT_NAME} && cd {PROJECT_NAME}
 bundle init
 ```
 
-- Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する（公開直後の gem を一定期間使わない供給チェーン対策。Bundler 4.0.13+ が必要）:
+- Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する:
   ```ruby
   source "https://rubygems.org", cooldown: 7
   ```
