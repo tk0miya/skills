@@ -18,8 +18,8 @@ fi
 
 echo "Running pre-commit checks..." >&2
 
-# Generate RBS and run all checks
-if ! bundle exec rbs-inline --opt-out --output=sig/ lib/ >&2; then
+# Regenerate RBS from scratch so that files orphaned by deleted lib/ sources are dropped too
+if ! bundle exec rake rbs:regenerate >&2; then
     echo "Error: RBS generation failed" >&2
     exit 2
 fi

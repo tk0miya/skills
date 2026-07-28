@@ -180,7 +180,7 @@ bundle exec rbs collection install
 （gem を作らない場合は `lib/` が無いのでスキップする）:
 
 ```bash
-bundle exec rake rbs:generate
+bundle exec rake rbs:regenerate
 ```
 
 `.gitignore` の先頭に以下のコメントを挿入し、末尾に以下を追記する（gem を作らない場合は
