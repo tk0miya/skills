@@ -39,4 +39,5 @@ chmod +x .claude/hooks/self-review.sh
 
 | ルール | 役割 |
 |---|---|
-| `RemoteTrigger` | Claude Code on the web でセルフチェックイン（「send later」）を毎回確認せず自動許可する |
+| `mcp__Claude_Code_Remote__send_later` | Claude Code on the web でセルフチェックイン（「send later」）の予約を毎回確認せず自動許可する |
+| `mcp__Claude_Code_Remote__delete_trigger` | 予約したセルフチェックインの取り消しを毎回確認せず自動許可する（Routine の削除全般が対象になる） |
