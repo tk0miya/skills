@@ -42,7 +42,7 @@ bundle --version
 bundle gem {PROJECT_NAME} --ci=github --test=rspec
 ```
 
-- gemspec の `required_ruby_version` を `">= {RUBY_VERSION}"` に更新する
+- gemspec を整える（後述の「gemspec の整備」に従う）
 - `bundle gem` が生成した spec ファイル（`spec/` 以下の `*_spec.rb`。`spec/spec_helper.rb` は残す）を削除する
   - 生成される example は 2 つとも残す価値がない。`it "does something useful"` は意図的に失敗するため CI が最初から赤で、Phase 3 で登録する required status checks を満たせず PR をマージできない。`it "has a version number"` は、コードに宣言的に書かれた定数をそのまま検証する価値の薄いテスト
   - example が 0 件でも `rake ci` は成功する
@@ -65,6 +65,45 @@ bundle gem {PROJECT_NAME} --ci=github --test=rspec
   ```
 - `bundle install` を実行
 - `bundle lock --add-platform x86_64-linux aarch64-linux` を実行
+
+#### gemspec の整備
+
+`bundle gem` が生成した gemspec に対して以下を行う。
+
+1. `required_ruby_version` を `">= {RUBY_VERSION}"` に更新する。
+
+2. `spec.files` の除外リスト（`f.start_with?(*%w[...])`）に開発用ファイルを追加する。
+   `bundle gem` が生成する除外リストは雛形時点のファイルしか対象にしておらず、そのままでは
+   このスキルが配置する設定ファイルがすべてリリース物に含まれてしまう。
+
+   既存の `%w[...]` の末尾に `.claude/` `.vscode/` `.rubocop.yml` `Rakefile` `Steepfile`
+   `rbs_collection` を追記する。除外リストの初期値は bundler のバージョンと `bundle gem` の
+   オプション・対話の回答によって変わるので、**元からある要素は消さず、既に入っているものは
+   重複させない**（linter に rubocop を選んだ場合は `.rubocop.yml` が初期値に入っている）。
+   前置一致なので `rbs_collection` の 1 要素で `rbs_collection.yaml` と
+   `rbs_collection.lock.yaml` の両方を拾える。
+
+   追記後はたとえば次のようになる（初期値は bundler 4.x で `--ci=github --test=rspec` の例）:
+
+   ```ruby
+     spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
+       ls.readlines("\x0", chomp: true).reject do |f|
+         (f == gemspec) ||
+           f.start_with?(*%w[bin/ Gemfile .gitignore .rspec spec/ .github/
+                             .claude/ .vscode/ .rubocop.yml Rakefile Steepfile
+                             rbs_collection])
+       end
+     end
+   ```
+
+   `sig/` の型定義は利用者に配布したいので除外しない。
+
+3. 実体のない雛形コメントを削除する。
+
+   - `# Uncomment to register a new dependency of your gem` と、続く
+     `# spec.add_dependency "example-gem", "~> 1.0"`
+   - `# For more information and examples about making a new gem, check out our`
+     `# guide at: https://bundler.io/guides/creating_gem.html`
 
 ### gem を作らない場合
 
