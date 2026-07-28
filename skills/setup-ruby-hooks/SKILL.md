@@ -38,6 +38,6 @@ chmod +x .claude/hooks/*.sh
 | ファイル | タイミング | 役割 |
 |---|---|---|
 | `protect-sig-files.sh` | PreToolUse | `sig/` への直接編集と手動 rbs-inline 実行を禁止する |
-| `pre-commit-check.sh` | PreToolUse | `git commit` 前に rbs-inline と rake を実行する |
+| `pre-commit-check.sh` | PreToolUse | `git commit` 前に rbs-inline と rake を実行し、`sig/` の未ステージ差分を検出する |
 | `rbs-inline.sh` | PostToolUse | `lib/*.rb` 編集後に自動で `.rbs` ファイルを生成する |
 | `claude-code-web-session-start.sh` | SessionStart | Claude Code on the web での Bundler + Ruby 3.3 互換性問題を回避する |

@@ -128,6 +128,13 @@ bundle exec rbs collection init
 bundle exec rbs collection install
 ```
 
+`bundle gem` が生成する `sig/` は手書きのスタブなので、rbs-inline で生成し直す
+（gem を作らない場合は `lib/` が無いのでスキップする）:
+
+```bash
+bundle exec rake rbs:generate
+```
+
 `.gitignore` の先頭に以下のコメントを挿入し、末尾に以下を追記する（gem を作らない場合は
 `.gitignore` が生成されていないので、この内容で新規作成する）:
 
