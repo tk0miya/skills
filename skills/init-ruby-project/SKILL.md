@@ -214,6 +214,16 @@ ASCII 順を維持した適切な箇所に追記:
 セルフレビューがコミット粒度の分割を指摘した場合は、その指摘だけ採用せずにコミットする
 （粒度以外の指摘には通常どおり対応する）。
 
+コミットする前に、`bundle gem` が残した TODO プレースホルダーを埋める（gem を作る場合のみ）。
+
+リポジトリはまだ無いので、URL は `gh api user -q .login` とプロジェクト名から組み立てる。
+
+- `homepage` と `metadata["source_code_uri"]`: `https://github.com/{OWNER}/{PROJECT_NAME}`
+  （TODO のままだと RubyGems が URI として検証して `gem build` が落ちる）
+- `metadata["changelog_uri"]`: `https://github.com/{OWNER}/{PROJECT_NAME}/blob/main/CHANGELOG.md`
+- `metadata["allowed_push_host"]`: `https://rubygems.org`
+- `summary` / `description` と `README.md`: ユーザーに確認する
+
 ```bash
 set -e
 [[ -d .git ]] || git init
