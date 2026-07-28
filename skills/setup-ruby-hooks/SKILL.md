@@ -38,6 +38,10 @@ chmod +x .claude/hooks/*.sh
 | ファイル | タイミング | 役割 |
 |---|---|---|
 | `protect-sig-files.sh` | PreToolUse | `sig/` への直接編集と手動 rbs-inline 実行を禁止する |
-| `pre-commit-check.sh` | PreToolUse | `git commit` 前に rbs-inline と rake を実行し、`sig/` の未ステージ差分を検出する |
+| `pre-commit-check.sh` | PreToolUse | `git commit` 前に `rake rbs:regenerate` で RBS を再生成し、`sig/` の未ステージ差分を検出した後 `rake` を実行する |
 | `rbs-inline.sh` | PostToolUse | `lib/*.rb` 編集後に自動で `.rbs` ファイルを生成する |
 | `claude-code-web-session-start.sh` | SessionStart | Claude Code on the web での Bundler + Ruby 3.3 互換性問題を回避する |
+
+`pre-commit-check.sh` は `rake rbs:regenerate` とデフォルトタスクを実行するため、`init-ruby-project`
+が配置する Rakefile（または同等のタスク定義）を前提とする。`rbs:regenerate` を持たない既存
+プロジェクトに配置する場合は、先に Rakefile 側のタスクを更新する。
