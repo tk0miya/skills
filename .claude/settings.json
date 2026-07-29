@@ -1,10 +1,4 @@
 {
-  "permissions": {
-    "allow": [
-      "mcp__Claude_Code_Remote__delete_trigger",
-      "mcp__Claude_Code_Remote__send_later"
-    ]
-  },
   "hooks": {
     "PreToolUse": [
       {

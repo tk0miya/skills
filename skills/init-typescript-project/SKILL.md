@@ -100,7 +100,7 @@ npx biome init
 
 ### Claude Code hooks のセットアップ
 
-`setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks と permissions をセットアップする。
+`setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks をセットアップする。
 
 ## Phase 3: GitHub 操作（GitHub リポジトリ作成を選んだ場合のみ）
 
