@@ -39,13 +39,15 @@ bundle --version
 ### gem を作る場合
 
 ```bash
-bundle gem {PROJECT_NAME} --ci=github --test=rspec
+bundle gem {PROJECT_NAME} --ci=github --test=rspec --changelog
 ```
 
 - gemspec を整える（後述の「gemspec の整備」に従う）
 - `bundle gem` が生成した spec ファイル（`spec/` 以下の `*_spec.rb`。`spec/spec_helper.rb` は残す）を削除する
   - 生成される example は 2 つとも残す価値がない。`it "does something useful"` は意図的に失敗するため CI が最初から赤で、Phase 3 で登録する required status checks を満たせず PR をマージできない。`it "has a version number"` は、コードに宣言的に書かれた定数をそのまま検証する価値の薄いテスト
   - example が 0 件でも `rake ci` は成功する
+- `CHANGELOG.md` の日付付き `## [0.1.0]` セクション（見出しと続く `- Initial release`）を削除し、`## [Unreleased]` だけを残す
+  - まだ 1 度もリリースしていないのに、日付付きの 0.1.0 がリリース済みに見え、この CHANGELOG を読んだ人やツールが誤解する。初回リリース時に `## [Unreleased]` を 0.1.0 のセクションとして確定させればよい
 - Gemfile の `source "https://rubygems.org"` 行に cooldown を付与する:
   ```ruby
   source "https://rubygems.org", cooldown: 7
