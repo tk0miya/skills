@@ -57,7 +57,9 @@ Installs Claude Code hooks tailored for Ruby projects (rbs-inline, pre-commit ch
 
 ### setup-dev-workflow-hooks
 
-Installs Claude Code hooks for general development workflow (self-review, etc.).
+Installs Claude Code hooks for general development workflow (self-review, etc.). The
+self-review hook also breaks out of the review-fix loop and asks the human when the
+same review point keeps recurring, instead of retrying it forever.
 
 ### self-review
 
