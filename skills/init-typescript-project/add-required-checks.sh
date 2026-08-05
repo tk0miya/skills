@@ -45,6 +45,14 @@ done
 
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 1; }
 
+# Rulesets need GitHub Pro on a private repository; nothing to configure here.
+if [[ "$(gh repo view "$REPO" --json visibility -q .visibility)" == "PRIVATE" ]]; then
+  echo "WARNING: ${REPO} is private and rulesets need GitHub Pro;" \
+       "leaving it unprotected, with no required checks:" \
+       "${CHECKS[*]+"${CHECKS[*]}"}" >&2
+  exit 0
+fi
+
 RULESET_NAME="main"
 
 BASE_RULES='[
