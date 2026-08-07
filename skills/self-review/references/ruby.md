@@ -74,9 +74,42 @@ Steep + rbs collection を使う構成で gem の型を利用する変更では�
 
 ### テスト対象（subject）
 
-- **`subject` にテスト対象のコードを定義**しているか（実行する対象の呼び出しを `subject` に置く）。
+- **メソッド・呼び出しを表す `describe` に、対応する `subject` を定義**しているか。`describe` が対象の宣言、`subject` がその呼び出しという対にすることで、テスト対象の呼び出しが一箇所に定まり、各 `context` は実行条件だけを差し替える構造になる。ただし単一の呼び出しに対応しない `describe`（クラス全体や機能のまとまりを表すもの）は対象外。
 - **名前付き `subject`（`subject(:name)`）を使っていない**か。
 - **example 内にテスト対象のコードを直接書いていない**か（呼び出しは `subject` を通す）。
+- **テスト対象の呼び出しを `before` ブロックに書いていない**か。値を返さない（戻り値を検証しない）ことや、ワンライナー（`is_expected.to`）が書けないことは、`subject` を省略して `before` で呼ぶ理由にならない。テスト対象が `before` に紛れると、spec を読んでも何をテストしているのかが `subject` から辿れなくなり、`expect { subject }.to change { ... }` のような実行前後の比較もできなくなる。`before` から呼んでよいのは、その `context` の実行条件（事前状態）を作るための呼び出しに限る。
+
+```ruby
+# 悪い例：値を返さないからと subject を省略し、before でテスト対象を呼び出している
+describe "#increment" do
+  let(:counter) { Counter.new(initial) }
+
+  before { counter.increment }
+
+  context "when the counter starts at zero" do
+    let(:initial) { 0 }
+
+    it "increments the count" do
+      expect(counter.count).to eq(1)
+    end
+  end
+end
+
+# 良い例：テスト対象は subject に置き、example 内で呼び出す
+describe "#increment" do
+  subject { counter.increment }
+
+  let(:counter) { Counter.new(initial) }
+
+  context "when the counter starts at zero" do
+    let(:initial) { 0 }
+
+    it "increments the count" do
+      expect { subject }.to change { counter.count }.from(0).to(1)
+    end
+  end
+end
+```
 
 ### 検証（expectation）
 
