@@ -63,7 +63,7 @@ same review point keeps recurring, instead of retrying it forever.
 
 ### self-review
 
-Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus language/framework-specific perspectives (e.g. RSpec for Ruby), loaded additively based on the detected stack, and loops on fixes until the review passes. Add a language/framework by dropping a `references/<name>.md` into the skill.
+Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus perspectives selected from the project's stack and the files being changed (e.g. RSpec for Ruby, or CLAUDE.md), loaded additively, and loops on fixes until the review passes. Add a perspective by dropping a `references/<name>.md` into the skill and adding a row to the selection table in its `SKILL.md`.
 
 ### setup-github-workflows
 

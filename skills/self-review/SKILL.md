@@ -17,13 +17,14 @@ agent: Explore
 同梱の観点ファイルを読み込む（パスはこのスキルのディレクトリからの相対）。
 
 - **常に** `references/common.md` を読む。
-- プロジェクトの言語に対応する観点ファイルがあれば追加で読む（複数該当すれば全て加算）。
+- 判定材料に該当する観点ファイルがあれば追加で読む（複数該当すれば全て加算）。
 
 | 判定材料 | 追加で読む観点 |
 |---|---|
 | `Gemfile` または `*.gemspec` がある | `references/ruby.md` |
 | `skills/**/*.md` を変更している | `references/skill-review.md` |
 | `README*` / `CHANGELOG*` などのドキュメントを変更している | `references/docs.md` |
+| `CLAUDE.md` を変更している | `references/claude-md.md` |
 
 ### 2. 変更をレビューする
 
