@@ -25,6 +25,7 @@ agent: Explore
 | `skills/**/*.md` を変更している | `references/skill-review.md` |
 | `README*` / `CHANGELOG*` などのドキュメントを変更している | `references/docs.md` |
 | `CLAUDE.md` を変更している | `references/claude-md.md` |
+| `.claude/rules/**` を変更している | `references/rules.md` |
 
 ### 2. 変更をレビューする
 
