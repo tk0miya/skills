@@ -26,13 +26,16 @@ gh skill install tk0miya/skills <skill-name> --agent claude-code --scope project
 
 Automates the initial setup of a Ruby project.
 
-Sets up the following automatically:
+Run it in the project directory. Sets up the following automatically:
 
-- Scaffolding for a gem or a plain Ruby project
+- Gemfile (and gemspec for a gem)
 - RuboCop / Steep configuration files
 - Ruby-specific GitHub Actions workflows (CI, rbs_collection, release) and Dependabot config (bundler)
 - VSCode settings
 - GitHub repository creation
+
+It inspects the current directory and skips whatever is already done, so it also works on a
+project that is partly set up. It does not scaffold: run `bundle gem` yourself first for a gem.
 
 Delegates the language-agnostic GitHub setup to `setup-github-workflows`, which must also be
 installed.
