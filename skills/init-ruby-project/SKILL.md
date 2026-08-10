@@ -214,6 +214,17 @@ gemspec の `required_ruby_version` や `.rubocop.yml` の `TargetRubyVersion` �
 | `vscode/settings.json` | `.vscode/settings.json` | 常時 |
 | `vscode/extensions.json` | `.vscode/extensions.json` | 常時 |
 
+gem のプロジェクトでない場合は、配置した `Rakefile` から次の 1 行を削除する。
+
+```ruby
+require "bundler/gem_tasks"
+```
+
+これが定義する `build` / `release` タスクは gem を公開するためのもので（`release.yml` が使う
+`rubygems/release-gem` が前提にしている）、gem 以外では使わない。しかも読み込み時に gemspec を
+解決するので、gemspec が無いと Rakefile がその行で例外を投げ、`rake ci` も動かず CI が最初から
+赤になる。
+
 他言語のプロジェクトに Ruby を足す場合は、`.github` の 2 つが既存の設定とぶつかる。
 
 - `.github/workflows/ci.yml` が既にあり Ruby のものでなければ、上書きせず `ruby.yml` として配置する
