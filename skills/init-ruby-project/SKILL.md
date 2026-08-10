@@ -264,8 +264,37 @@ ASCII 順を維持した適切な箇所に追記（既に入っている行は�
 
 ### Claude Code hooks のセットアップ
 
-`setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks をセットアップする。
-続けて `setup-ruby-hooks` スキルを実行して Ruby 向けの Claude Code hooks をセットアップする。
+まず `setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks をセットアップする。
+続けて、このスキルの以下のファイルを配置して Ruby 向けの hooks をセットアップする。
+
+| テンプレート | 配置先 |
+|---|---|
+| `hooks/protect-sig-files.sh` | `.claude/hooks/protect-sig-files.sh` |
+| `hooks/pre-commit-check.sh` | `.claude/hooks/pre-commit-check.sh` |
+| `hooks/rbs-inline.sh` | `.claude/hooks/rbs-inline.sh` |
+| `hooks/claude-code-web-session-start.sh` | `.claude/hooks/claude-code-web-session-start.sh` |
+
+`.claude/settings.json` には `claude-settings.json` の hooks 定義をマージする（`setup-dev-workflow-hooks`
+が先に書き込んでいるので、既存の hooks や `permissions` は保持する）。
+
+配置後、以下を実行してスクリプトに実行権限を付与する:
+
+```bash
+chmod +x .claude/hooks/*.sh
+```
+
+#### 各 hook の役割
+
+| ファイル | タイミング | 役割 |
+|---|---|---|
+| `protect-sig-files.sh` | PreToolUse | プロジェクト直下の `sig/`（`sig/gems/` を除く）への直接編集と手動 rbs-inline 実行を禁止する |
+| `pre-commit-check.sh` | PreToolUse | `git commit` 前に `rake rbs:regenerate` で RBS を再生成し、`sig/` の未ステージ差分を検出した後 `rake` を実行する |
+| `rbs-inline.sh` | PostToolUse | `lib/*.rb` 編集後に自動で `.rbs` ファイルを生成する |
+| `claude-code-web-session-start.sh` | SessionStart | Claude Code on the web での Bundler + Ruby 3.3 互換性問題を回避する |
+
+これらの hook は、Phase 2 で配置した `Rakefile` の `rbs:regenerate` とデフォルトタスク、
+`.rubocop.yml` の `Style/RbsInline` の opt_out モード、`Steepfile` の `signature "sig"` を前提に
+している。hook だけを別に配ると規約がずれて動かないので、このスキルが同じ Phase でまとめて配る。
 
 ## Phase 3: GitHub 操作
 
