@@ -63,7 +63,7 @@ same review point keeps recurring, instead of retrying it forever.
 
 ### self-review
 
-Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus perspectives selected from the project's stack and the files being changed (e.g. RSpec for Ruby, or CLAUDE.md), loaded additively, and loops on fixes until the review passes. Add a perspective by dropping a `references/<name>.md` into the skill and adding a row to the selection table in its `SKILL.md`.
+Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus perspectives selected from the project's stack and the files being changed (e.g. RSpec for Ruby, or CLAUDE.md), loaded additively. Findings come back graded: a defect carries one sentence on what breaks if it is left, and a judgement call — a choice with no basis in the repository — carries the options instead of a verdict, both tagged with the perspective they came from. A point that is neither is not reported at all. That grading is what the caller weighs when deciding how far to go before committing. Add a perspective by dropping a `references/<name>.md` into the skill and adding a row to the selection table in its `SKILL.md`.
 
 ### setup-github-workflows
 
