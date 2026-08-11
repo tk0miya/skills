@@ -8,10 +8,13 @@
 # bundled `code-review` skill otherwise — so the hook works even in projects
 # that don't ship the custom self-review skill.
 #
-# A per-change-set marker (keyed by a hash of the diff, stored under .git/)
-# prevents an infinite block loop: once a change-set has been surfaced for
-# review, the matching commit is allowed through. If the review leads to fixes,
-# the diff changes, so the new state is reviewed once more before it commits.
+# A state file under .git/ records the change-sets already surfaced for review,
+# keyed by the commit they build on. A change-set that was reviewed commits
+# without another block; a change-set the review has not seen — the fixes it
+# asked for change the diff — is reviewed once more. Reviews are capped per
+# commit, because a review that keeps finding something to fix would otherwise
+# block every commit attempt forever. Once the cap is spent the hook stops
+# gating and says so; a landed commit moves HEAD and starts a fresh cap.
 #
 
 set -euo pipefail
@@ -44,12 +47,14 @@ if [[ -z "$git_dir" ]]; then
   exit 0
 fi
 
-# Hash what will be committed. `git status --porcelain` is included so a commit
-# that only adds untracked files isn't mistaken for empty; `git diff HEAD` adds
-# tracked content. On the first commit there is no HEAD, so use the working state.
-if git -C "$work_dir" rev-parse --verify HEAD >/dev/null 2>&1; then
+# Hash what will be committed, and name the commit it builds on. `git status
+# --porcelain` is included so a commit that only adds untracked files isn't
+# mistaken for empty; `git diff HEAD` adds tracked content. On the first commit
+# there is no HEAD, so use the working state.
+if base=$(git -C "$work_dir" rev-parse --verify HEAD 2>/dev/null); then
   changeset=$(git -C "$work_dir" status --porcelain; git -C "$work_dir" diff HEAD)
 else
+  base="initial-commit"
   changeset=$(git -C "$work_dir" status --porcelain; git -C "$work_dir" diff; git -C "$work_dir" diff --cached)
 fi
 
@@ -59,10 +64,27 @@ if [[ -z "$changeset" ]]; then
 fi
 
 hash=$(printf '%s' "$changeset" | git hash-object --stdin)
-state_file="$git_dir/self-review-reviewed"
+
+# The base commit goes on the first line, one reviewed change-set hash per line
+# below it. A first line other than the current base records an earlier commit,
+# so the file is started over.
+state_file="$git_dir/self-review-state"
+if [[ ! -f "$state_file" ]] || [[ "$(head -n 1 "$state_file")" != "$base" ]]; then
+  printf '%s\n' "$base" > "$state_file"
+fi
 
 # Already surfaced for review → allow the commit.
-if [[ -f "$state_file" ]] && grep -qxF "$hash" "$state_file"; then
+if grep -qxF "$hash" <(tail -n +2 "$state_file"); then
+  exit 0
+fi
+
+# One line per review spent on this commit, plus the base commit line. Out of
+# reviews → let the commit through, and report the review that did not happen.
+max_reviews=5
+if (( $(wc -l < "$state_file") - 1 >= max_reviews )); then
+  jq -n --arg max "$max_reviews" '{
+    "systemMessage": ("Committing without a self-review: this commit has already been reviewed " + $max + " times.")
+  }'
   exit 0
 fi
 
