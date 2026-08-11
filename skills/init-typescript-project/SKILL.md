@@ -115,6 +115,16 @@ npm install -D typescript @biomejs/biome vitest @types/node
 mkdir -p src test
 ```
 
+続けてエントリポイントのプレースホルダを作成する。`tsconfig.json` の `include` は `src` だけを
+見るため、`src/` が空のままだと `tsc --noEmit` が TS18003（No inputs were found in config file）で
+失敗し、CI と pre-commit hook のどちらも通らなくなる。
+
+```bash
+cat > src/index.ts <<'EOF'
+// Entry point. Replace this placeholder with the project's implementation.
+EOF
+```
+
 ## Phase 2: 設定ファイルの配置（自動実行）
 
 このフェーズは全項目を実行する。ただし配置先に既にファイルがある場合は、上書きする前に内容を
@@ -172,7 +182,34 @@ biome.json（既にある場合はその内容）に以下の設定が無けれ�
 
 ### Claude Code hooks のセットアップ
 
-`setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks をセットアップする。
+まず `setup-dev-workflow-hooks` スキルを実行して汎用の開発ワークフロー hooks をセットアップする。
+続けて、このスキルの以下のファイルを配置して TypeScript 向けの hooks をセットアップする。
+
+| テンプレート | 配置先 |
+|---|---|
+| `hooks/pre-commit-check.sh` | `.claude/hooks/pre-commit-check.sh` |
+
+`.claude/settings.json` には `claude-settings.json` の hooks 定義をマージする（`setup-dev-workflow-hooks`
+が先に書き込んでいるので、既存の hooks や `permissions` は保持する）。
+
+配置後、以下を実行してスクリプトに実行権限を付与する:
+
+```bash
+chmod +x .claude/hooks/*.sh
+```
+
+#### 各 hook の役割
+
+| ファイル | タイミング | 役割 |
+|---|---|---|
+| `pre-commit-check.sh` | PreToolUse | `git commit` 前に `npm run ci`（lint / typecheck / test）を実行し、失敗したらコミットを止める |
+
+この hook は、Phase 1 で `package.json` に定義した `ci` スクリプトを前提にしている。hook だけを
+別に配ると規約がずれて動かないので、このスキルが同じ Phase でまとめて配る。
+
+`ci` は `.github/workflows/ci.yml` が実行するものと同一なので、コミットが通れば CI も通る。なお
+`ci` の lint は検査のみで自動修正しないため、フォーマット差分で止まった場合は `npm run lint:fix`
+を実行してからコミットし直す。
 
 ## Phase 3: GitHub 操作
 

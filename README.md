@@ -49,11 +49,12 @@ Sets up the following automatically:
 
 - Scaffolding, tsconfig / Biome / Vitest configuration files
 - TypeScript-specific GitHub Actions workflows (CI, biome-migrate) and Dependabot config (npm)
+- Claude Code hooks tailored for TypeScript (pre-commit checks)
 - VSCode settings
 - GitHub repository creation
 
-Delegates the language-agnostic GitHub setup to `setup-github-workflows`, which must also be
-installed.
+Delegates the language-agnostic GitHub setup to `setup-github-workflows` and the general
+development workflow hooks to `setup-dev-workflow-hooks`, both of which must also be installed.
 
 ### setup-dev-workflow-hooks
 
