@@ -31,14 +31,15 @@ Run it in the project directory. Sets up the following automatically:
 - Gemfile (and gemspec for a gem)
 - RuboCop / Steep configuration files
 - Ruby-specific GitHub Actions workflows (CI, rbs_collection, release) and Dependabot config (bundler)
+- Claude Code hooks tailored for Ruby (rbs-inline, pre-commit checks, sig protection)
 - VSCode settings
 - GitHub repository creation
 
 It inspects the current directory and skips whatever is already done, so it also works on a
 project that is partly set up. It does not scaffold: run `bundle gem` yourself first for a gem.
 
-Delegates the language-agnostic GitHub setup to `setup-github-workflows`, which must also be
-installed.
+Delegates the language-agnostic GitHub setup to `setup-github-workflows` and the general
+development workflow hooks to `setup-dev-workflow-hooks`, both of which must also be installed.
 
 ### init-typescript-project
 
@@ -53,10 +54,6 @@ Sets up the following automatically:
 
 Delegates the language-agnostic GitHub setup to `setup-github-workflows`, which must also be
 installed.
-
-### setup-ruby-hooks
-
-Installs Claude Code hooks tailored for Ruby projects (rbs-inline, pre-commit checks, sig protection, etc.).
 
 ### setup-dev-workflow-hooks
 
