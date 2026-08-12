@@ -60,7 +60,8 @@ development workflow hooks to `setup-dev-workflow-hooks`, both of which must als
 
 Installs Claude Code hooks for general development workflow (self-review, etc.). The
 self-review hook holds back the first commit of a change-set until the changes have been
-reviewed.
+reviewed, and stops gating once the same commit has been reviewed five times, so a review
+that keeps finding something to fix cannot block the commit forever.
 
 ### self-review
 

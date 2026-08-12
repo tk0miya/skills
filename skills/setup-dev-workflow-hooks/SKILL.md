@@ -33,4 +33,4 @@ chmod +x .claude/hooks/self-review.sh
 
 | ファイル | タイミング | 役割 |
 |---|---|---|
-| `self-review.sh` | PreToolUse | `git commit` の前にコードレビューを起動する。`self-review` スキルがあればそれを、無ければバンドルスキルの `code-review` にフォールバックする。レビュー済みの変更セットはコミットを通す（無限ブロックを防ぐ） |
+| `self-review.sh` | PreToolUse | `git commit` の前にコードレビューを起動する。`self-review` スキルがあればそれを、無ければバンドルスキルの `code-review` にフォールバックする。レビュー済みの変更セットはコミットを通し、同じコミットへのレビューが 5 回に達したらそれ以降は止めない（レビューと修正の往復が終わらなくなるのを防ぐ） |
