@@ -29,16 +29,28 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty')
 if [[ "$tool_name" != "Bash" ]]; then
   exit 0
 fi
-# Match `git commit`, or `git -C <path> commit`.
-commit_re='git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit'
+# Match `git commit`, or `git -C <path> commit`, only where a command starts — at
+# the beginning of the string or after a shell separator. Matching anywhere would
+# also fire on those words inside an argument (a commit message, or a review
+# finding that talks about committing), denying a command that commits nothing.
+# Text that spells out a whole command, separator and all (`... && git commit`),
+# does still match, and a prefixed `sudo` or `env FOO=1` no longer does. Command
+# substitution and subshells are left out of the separators on purpose: a backtick
+# or an opening paren before the words is how prose quotes them, while running a
+# commit that way is only useful to capture its output, which nobody needs.
+cmd_start=$'(^|[;&|\n])[[:space:]]*'
+commit_re="${cmd_start}git[[:space:]]+(-C[[:space:]]+[^[:space:]]+[[:space:]]+)?commit"
 if [[ ! "$command" =~ $commit_re ]]; then
   exit 0
 fi
 
 # If the command targets a specific repo via `git -C <path>`, operate there too.
+# Anchored the same way: a path read out of an argument would point the hook at
+# another repository, and one that is not a repo turns the gate off entirely.
 work_dir="."
-if [[ "$command" =~ git[[:space:]]+-C[[:space:]]+([^[:space:]]+) ]]; then
-  work_dir="${BASH_REMATCH[1]}"
+dir_re="${cmd_start}git[[:space:]]+-C[[:space:]]+([^[:space:]]+)[[:space:]]+commit"
+if [[ "$command" =~ $dir_re ]]; then
+  work_dir="${BASH_REMATCH[2]}"
 fi
 
 # Not a git repo → nothing to do.
