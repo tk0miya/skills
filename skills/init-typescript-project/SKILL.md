@@ -145,6 +145,7 @@ biome.json（既にある場合はその内容）に以下の設定が無けれ�
 - `files.includes`: `["**", "!!**/dist"]`
 - `formatter`: `{ "indentStyle": "space", "indentWidth": 2, "lineWidth": 120 }`
 - `javascript.formatter`: `{ "quoteStyle": "double" }`
+- `linter.domains`: `{ "types": "all" }`（型推論が必要なルールを有効化する）
 - `assist.actions.source.organizeImports`: `"on"`
 
 ### テンプレートファイルのコピー
