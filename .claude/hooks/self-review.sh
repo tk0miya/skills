@@ -100,9 +100,14 @@ about to be committed BEFORE running git commit again:
 Judge each finding the review returns rather than fixing it on sight. Weigh what the review
 attached to it — how it graded the point, the basis it gave — and decide whether acting on it
 is worth it. Where you skip a finding, say so; do not drop it silently. Where the choice needs
-a requirement or an intent you do not have, leave it to the user. Once every fix you judged
-necessary is in, review again; when nothing you judged worth fixing is left, run the same git
-commit command again to proceed — it will be allowed through.'
+a requirement or an intent you do not have, leave it to the user.
+
+Once every fix you judged necessary is in, review again; when nothing you judged worth fixing
+is left, run the same git commit command again to proceed — it will be allowed through. Only a
+round that raises a point no earlier round raised earns another round. A point a round repeats,
+or one that asks you to undo a fix an earlier round asked for, cannot be settled between the
+reviews and no further round will settle it: leave that point as it stands, say it is unsettled
+and that you are leaving it to the user, and judge the other points in the round as usual.'
 
 jq -n --arg reason "$review_prompt" '{
   "hookSpecificOutput": {

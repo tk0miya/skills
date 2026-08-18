@@ -61,11 +61,14 @@ development workflow hooks to `setup-dev-workflow-hooks`, both of which must als
 Installs Claude Code hooks for general development workflow (self-review, etc.). The
 self-review hook holds back the first commit of a change-set until the changes have been
 reviewed, and stops gating once the same commit has been reviewed five times, so a review
-that keeps finding something to fix cannot block the commit forever.
+that keeps finding something to fix cannot block the commit forever. The prompt it blocks with
+bounds the review-and-fix loop the caller runs on its own, which no hook can count: only a
+round that raises a point no earlier round raised earns another, and a point that repeats or
+reverses an earlier round's goes to the user as unsettled instead of into one more round.
 
 ### self-review
 
-Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus perspectives selected from the project's stack and the files being changed (e.g. RSpec for Ruby, or CLAUDE.md), loaded additively. Findings come back graded: a defect carries one sentence on what breaks if it is left, and a judgement call — a choice with no basis in the repository — carries the options instead of a verdict, both tagged with the perspective they came from. A point that is neither is not reported at all. The caller weighs that grading to decide what to act on, settles a judgement call rather than fixing it, and says out loud what it skips. Along with the findings it hands back a command that appends them to `.git/self-review-log.jsonl`, one JSON object per line, so past findings can be read back later. The log is local to the clone and never committed. Add a perspective by dropping a `references/<name>.md` into the skill and adding a row to the selection table in its `SKILL.md`.
+Single source of truth for code-review perspectives. Just before committing, it self-reviews the changes about to be committed against a common checklist plus perspectives selected from the project's stack and the files being changed (e.g. RSpec for Ruby, or CLAUDE.md), loaded additively. Findings come back graded: a defect carries one sentence on what breaks if it is left, and a judgement call — a choice with no basis in the repository — carries the options instead of a verdict, both tagged with the perspective they came from. A point that is neither is not reported at all. The caller weighs that grading to decide what to act on, settles a judgement call rather than fixing it, and says out loud what it skips. The report also says when to stop reviewing: a point a later round repeats, or one that undoes a fix an earlier round asked for, goes to the user as unsettled rather than into another round — only the caller sees the earlier rounds, so only it can tell. Along with the findings it hands back a command that appends them to `.git/self-review-log.jsonl`, one JSON object per line, so past findings can be read back later. The log is local to the clone and never committed. Add a perspective by dropping a `references/<name>.md` into the skill and adding a row to the selection table in its `SKILL.md`.
 
 ### setup-github-workflows
 
