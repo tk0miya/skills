@@ -42,7 +42,8 @@ head=$(git -C "$work_dir" rev-parse --verify HEAD 2>/dev/null || echo "initial-c
 branch=$(git -C "$work_dir" symbolic-ref --quiet --short HEAD || echo "detached")
 
 # The base commit goes on the first line, the rounds spent on it on the second,
-# and the branch they were spent on on the third.
+# the branch they were spent on on the third, and the id of the round this call
+# starts on the fourth, which log.sh reads to tie that round's findings to it.
 rounds=0
 if [[ -f "$state_file" ]]; then
   base=$(sed -n 1p "$state_file")
@@ -63,7 +64,31 @@ if (( rounds >= max_rounds )); then
   exit 0
 fi
 
+# Eight random bytes, so two rounds started in the same second stay distinct.
+round_id=$(od -An -N8 -tx1 /dev/urandom 2>/dev/null | tr -d ' \n' || true)
+[[ -n "$round_id" ]] || round_id="$(date -u +%Y%m%d%H%M%S)-$$"
+
 # Count the round before it runs: a round that starts and returns nothing still
 # spent an attempt, and repeating it forever is the loop this cap is for.
-printf '%s\n%s\n%s\n' "$head" "$((rounds + 1))" "$branch" > "$state_file"
+printf '%s\n%s\n%s\n%s\n' "$head" "$((rounds + 1))" "$branch" "$round_id" > "$state_file"
+
+# Record the round in the findings log, for the same reason it is counted here:
+# every round is one, not only the rounds that found something. Findings alone
+# have no denominator -- a perspective on six lines reads the same whether it
+# came up in six rounds out of eight or over six reviews nobody counted.
+#
+# Deliberately last, and never allowed to fail. A round is counted whether or
+# not it can be logged: exiting non-zero here would print neither `proceed` nor
+# `stop`, which stops the review over bookkeeping, and an unrecorded round only
+# leaves that round's findings ungrouped.
+if common_dir=$(git -C "$work_dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+  if line=$(jq -c -n \
+      --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      --arg round_id "$round_id" \
+      --arg head "$head" \
+      '{type: "round", timestamp: $timestamp, round_id: $round_id, head: $head}' 2>/dev/null); then
+    printf '%s\n' "$line" >> "$common_dir/self-review-log.jsonl" || true
+  fi
+fi
+
 echo proceed
