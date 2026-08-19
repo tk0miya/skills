@@ -28,7 +28,7 @@ node --version
 済んでいるかを判定する。
 
 ```bash
-ls -1d .git package.json biome.json 2>/dev/null
+ls -1d .git package.json biome.json biome.jsonc 2>/dev/null
 [[ -e .git ]] && git remote get-url origin 2>/dev/null
 [[ -e .git ]] && git rev-parse --verify -q HEAD && git status --porcelain
 ```
@@ -36,7 +36,7 @@ ls -1d .git package.json biome.json 2>/dev/null
 | 判定 | 条件 | 影響 |
 |---|---|---|
 | package.json 作成済み | `package.json` がある | Phase 1 の `npm init -y` をスキップし、既存の内容は上書きしない |
-| biome.json 作成済み | `biome.json` がある | Phase 2 の `npx biome init` をスキップ |
+| Biome 設定作成済み | `biome.json` か `biome.jsonc` がある | Phase 2 の `npx biome init --jsonc` をスキップ（`biome.json` なら `biome.jsonc` にリネーム） |
 | リポジトリ作成済み | カレントディレクトリに `.git` があり、`origin` がある | Phase 3 の `gh repo create` をスキップする |
 
 `origin` を見る前にカレントディレクトリの `.git` を確認するのは、別のリポジトリの配下に作った
@@ -128,19 +128,33 @@ EOF
 ## Phase 2: 設定ファイルの配置（自動実行）
 
 このフェーズは全項目を実行する。ただし配置先に既にファイルがある場合は、上書きする前に内容を
-確認する。`npm init` / `npx biome init` が生成したままの内容なら上書きしてよい。ユーザーが手を
-入れた形跡がある場合は上書きせず、テンプレートとの差分を提示して残すか置き換えるかをユーザーに
-確認する。
+確認する。`npm init` / `npx biome init --jsonc` が生成したままの内容なら上書きしてよい。
+ユーザーが手を入れた形跡がある場合は上書きせず、テンプレートとの差分を提示して残すか
+置き換えるかをユーザーに確認する。
 
-### biome.json の生成と設定
+### biome.jsonc の生成と設定
 
-biome.json が無ければ作る:
+設定ファイルは `biome.json` ではなく `biome.jsonc` を使う。なぜその設定にしたのかをコメントで
+残せるようにするため。このスキルが行うのはコメントを書ける形式にするまでで、コメント自体は
+各プロジェクトで必要に応じて書き足す。
+
+`biome.json` も `biome.jsonc` も無ければ作る:
 
 ```bash
-npx biome init
+npx biome init --jsonc
 ```
 
-biome.json（既にある場合はその内容）に以下の設定が無ければ加筆・修正する:
+`biome.json` が既にある場合は、設定ファイルの形式をプロジェクト間でそろえるため、既存の
+プロジェクトでも `biome.jsonc` にリネームする:
+
+```bash
+[[ -e biome.json ]] && mv biome.json biome.jsonc
+```
+
+リネーム後、`biome.json` を名指ししている箇所（`.vscode/settings.json` の `biome.configurationPath`、
+`package.json` の scripts や CI の `--config-path` など）が無いか確認し、あれば `biome.jsonc` に直す。
+
+`biome.jsonc`（既に設定がある場合はその内容）に以下の設定が無ければ加筆・修正する:
 - `vcs`: `{ "enabled": true, "clientKind": "git", "useIgnoreFile": true }`
 - `files.includes`: `["**", "!!**/dist"]`
 - `formatter`: `{ "indentStyle": "space", "indentWidth": 2, "lineWidth": 120 }`
