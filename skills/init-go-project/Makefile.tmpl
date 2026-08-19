@@ -1,0 +1,43 @@
+# All development tools are declared as `tool` directives in go.mod and invoked
+# through `go tool`, so a fresh checkout needs nothing installed but Go itself.
+
+GO ?= go
+
+.PHONY: build test lint fmt check vulncheck
+
+# A verification build: it compiles every package and throws the result away.
+# Once this module grows a command, point this at the command instead --
+#   $(GO) build -o bin/{{PROJECT_NAME}} ./cmd/{{PROJECT_NAME}}
+# -- and add a `run` target beside it.
+build:
+	$(GO) build ./...
+
+# -shuffle=on so that a test which only passes in the order it was written fails
+# here rather than in someone else's pull request.
+test:
+	$(GO) test ./... -race -cover -shuffle=on
+
+# Formatting is checked here rather than in a target of its own, so unformatted
+# code fails CI instead of turning up inside an unrelated diff. `make fmt` fixes
+# it; this target only reports.
+lint:
+	$(GO) tool golangci-lint run
+	@$(GO) mod tidy -diff || { echo "go.mod / go.sum: not tidy, run 'go mod tidy'"; exit 1; }
+	@set -e; unformatted="$$($(GO) tool gofumpt -l .)"; \
+	if [ -n "$$unformatted" ]; then \
+		echo "gofumpt: not formatted, run 'make fmt':"; \
+		echo "$$unformatted"; \
+		exit 1; \
+	fi
+
+fmt:
+	$(GO) tool gofumpt -w .
+
+# lint + test: what the pre-commit hook runs. Deliberately not the same set as
+# CI, which also runs `vulncheck` -- see the comment there.
+check: lint test
+
+# CI only. Reaching vuln.go.dev is not possible from every development
+# environment -- an egress proxy commonly blocks it.
+vulncheck:
+	$(GO) tool govulncheck ./...

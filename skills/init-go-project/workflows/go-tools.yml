@@ -1,0 +1,55 @@
+name: Go tools
+
+on:
+  schedule:
+    - cron: '00 8 * * MON'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.REPO_HOUSEKEEPER_CLIENT_ID }}
+          private-key: ${{ secrets.REPO_HOUSEKEEPER_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      # `tool` expands to the tools declared in go.mod, so the module paths live in
+      # one place only. `-u` stops at the latest minor or patch: a new major, which
+      # is a different module path, still has to be adopted by hand. `go get -u`
+      # leaves the module untidy, and `make lint` checks `go mod tidy -diff`, so the
+      # tidy is part of the update rather than a tidiness habit.
+      - name: Update the development tools
+        run: |
+          go get -u tool
+          go mod tidy
+
+      - name: Create a pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          add-paths: go.mod,go.sum
+          commit-message: 'go: Update the development tools'
+          branch: bot/go-tools
+          delete-branch: true
+          title: 'go: Update the development tools'
+          body: |
+            Raised the tools declared with `tool` directives in `go.mod` to their latest minor or patch releases with `go get -u tool`.
+
+            Dependabot does not cover them: `go get -tool` records them as `// indirect`, which its default scope leaves alone, and widening that scope would put every module the tools are built from in scope too.
+          labels: auto-merge
+          token: ${{ steps.app-token.outputs.token }}
