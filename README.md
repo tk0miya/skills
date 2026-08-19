@@ -22,6 +22,27 @@ gh skill install tk0miya/skills <skill-name> --agent claude-code --scope project
 
 ## Skills
 
+### init-go-project
+
+Automates the initial setup of a Go project.
+
+Sets up the following automatically:
+
+- `go.mod` with a patch-level `go` directive, and the development tools (golangci-lint, gofumpt,
+  govulncheck) declared as `tool` directives so that a fresh checkout needs nothing installed but Go
+- Makefile, golangci-lint and `.gitignore` configuration
+- Go-specific GitHub Actions workflows (CI, and a weekly one that raises the development tools and
+  opens a pull request) and Dependabot config (gomod)
+- Claude Code hooks tailored for Go (pre-commit checks)
+- GitHub repository creation
+
+It inspects the current directory and skips whatever is already done, so it also works on a project
+that is partly set up. It does not scaffold an application: it writes a single placeholder package,
+leaving the project free to grow into either a command or a library.
+
+Delegates the language-agnostic GitHub setup to `setup-github-workflows` and the general
+development workflow hooks to `setup-dev-workflow-hooks`, both of which must also be installed.
+
 ### init-ruby-project
 
 Automates the initial setup of a Ruby project.

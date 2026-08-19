@@ -1,0 +1,23 @@
+version: "2"
+
+linters:
+  # golangci-lint's standard set (errcheck, govet, ineffassign, staticcheck,
+  # unused), plus the linters below. Starting from the standard set rather than
+  # listing every linter means the ones golangci-lint promotes into it arrive on
+  # their own.
+  default: standard
+  enable:
+    - bodyclose
+    - revive
+
+  # Projects with their own risks want more: gosec where credentials or
+  # hand-written SQL are handled, sqlclosecheck where database/sql is used.
+  # Add them here as the project grows into them.
+
+  # golangci-lint's own curated exclusions, covering the patterns that would
+  # otherwise need a `//nolint` on every deferred Close and fmt.Fprintf. Narrow
+  # them if something they hide turns out to matter.
+  exclusions:
+    presets:
+      - common-false-positives
+      - std-error-handling

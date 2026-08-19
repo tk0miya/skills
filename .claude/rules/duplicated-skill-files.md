@@ -17,24 +17,25 @@ paths:
 
 ## add-required-checks.sh
 
-以下の 3 つは常に同一内容でなければならない。
+以下の 4 つは常に同一内容でなければならない。
 
 - `skills/setup-github-workflows/add-required-checks.sh` ← 変更はこれに入れる
+- `skills/init-go-project/add-required-checks.sh`
 - `skills/init-ruby-project/add-required-checks.sh`
 - `skills/init-typescript-project/add-required-checks.sh`
 
 1 つだけ直すと実装が乖離する。変更したら、同じコミットの中で残りにも反映する。
 
 ```bash
-for d in init-ruby-project init-typescript-project; do
+for d in init-go-project init-ruby-project init-typescript-project; do
   cp skills/setup-github-workflows/add-required-checks.sh "skills/$d/add-required-checks.sh"
 done
 ```
 
-コミット前に 3 つが一致していることを確認する（何も出力されなければ一致）。
+コミット前に 4 つが一致していることを確認する（何も出力されなければ一致）。
 
 ```bash
-for d in init-ruby-project init-typescript-project; do
+for d in init-go-project init-ruby-project init-typescript-project; do
   diff "skills/setup-github-workflows/add-required-checks.sh" \
        "skills/$d/add-required-checks.sh"
 done
@@ -66,8 +67,8 @@ cp skills/setup-dev-workflow-hooks/hooks/self-review.sh .claude/hooks/self-revie
 3. ファイル名を書いている側を直す。`.sh` をリネームするだけでは、存在しないファイルを
    実行しようとして壊れる
    - `add-required-checks.sh`
-     - `skills/init-ruby-project/SKILL.md` / `skills/init-typescript-project/SKILL.md` の
-       `bash {SKILL_DIR}/add-required-checks.sh` の行
+     - `skills/init-go-project/SKILL.md` / `skills/init-ruby-project/SKILL.md` /
+       `skills/init-typescript-project/SKILL.md` の `bash {SKILL_DIR}/add-required-checks.sh` の行
      - `skills/setup-github-workflows/setup.sh` の呼び出しとヘッダコメント
      - `skills/setup-github-workflows/SKILL.md`（本文とファイル一覧の表）
    - `self-review.sh`
