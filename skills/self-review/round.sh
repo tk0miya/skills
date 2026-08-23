@@ -20,7 +20,7 @@
 set -euo pipefail
 
 work_dir="${1:-.}"
-max_rounds=5
+max_rounds=3
 
 # Not --git-common-dir: worktrees prepare different commits in parallel, and one
 # budget shared between them would let a worktree spend another's rounds.
