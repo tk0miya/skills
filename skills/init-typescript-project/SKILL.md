@@ -110,8 +110,12 @@ package.json に以下が無ければ追記・修正する:
   }
   ```
 
+`@types/node` はメジャーバージョンを対象 Node.js バージョン（Phase 0 で決めた値）に合わせてインストールする。
+バージョンを指定せずにインストールすると `@types/node` の最新メジャーが入り、対象 Node.js バージョンより
+新しい型定義になって型チェックと実際の Node.js の挙動がずれることがあるため。
+
 ```bash
-npm install -D typescript @biomejs/biome vitest @types/node
+npm install -D typescript @biomejs/biome vitest @types/node@{{NODE_VERSION}}
 mkdir -p src test
 ```
 
