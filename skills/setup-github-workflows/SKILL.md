@@ -22,15 +22,26 @@ GitHub 側:
 
 ## ステップ 1: ファイルを配置
 
+まず対象リポジトリの visibility を確認する。
+
+```bash
+gh repo view --json visibility -q .visibility
+```
+
 このスキルが配置されているディレクトリ（以下 `{SKILL_DIR}`）以下を
 プロジェクトの `.github/` にコピーする。
 
 | テンプレート | 配置先 |
 |---|---|
 | `workflows/workflow-lint.yml` | `.github/workflows/workflow-lint.yml` |
-| `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml` |
+| `workflows/auto-merge.yml` | `.github/workflows/auto-merge.yml`（**private の場合は配置しない**） |
 | `workflows/dependabot-auto-label.yml` | `.github/workflows/dependabot-auto-label.yml` |
 | `dependabot.yml` | `.github/dependabot.yml`（既存が無い場合。ある場合は下記） |
+
+private リポジトリでは auto-merge（`gh pr merge --auto`）が実行できないため、
+`auto-merge.yml` は配置しない。`dependabot-auto-label.yml` はそのまま配置し、
+Dependabot の minor/patch PR に `auto-merge` ラベルを付与するところまでに留める
+（マージは人手で行う）。
 
 `.github/dependabot.yml` が既に存在する場合（別の ecosystem が置かれている場合など）は
 上書きせず、`github-actions` の `package-ecosystem` エントリが無ければ、テンプレートの当該
@@ -38,14 +49,17 @@ GitHub 側:
 
 ## ステップ 2: PR を作る
 
-ステップ 1 で置いたファイルを commit して PR を作る。パスを 4 ファイルに絞るのは、無関係な
+ステップ 1 で置いたファイルを commit して PR を作る。パスを配置したファイルに絞るのは、無関係な
 作業中の変更を巻き込まないため（上の表を変えたらここも合わせる）。
 
 ```bash
 set -euo pipefail
 git switch -c ci/setup-github-workflows
 git add .github/dependabot.yml \
-  .github/workflows/{workflow-lint,auto-merge,dependabot-auto-label}.yml
+  .github/workflows/workflow-lint.yml \
+  .github/workflows/dependabot-auto-label.yml
+# public の場合のみ
+git add .github/workflows/auto-merge.yml
 git commit -m "ci: set up GitHub Actions workflows and Dependabot"
 git push -u origin ci/setup-github-workflows
 gh pr create --fill
