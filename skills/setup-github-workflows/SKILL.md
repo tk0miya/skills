@@ -17,6 +17,8 @@ GitHub 側:
 ローカル側:
 
 - `jq` が利用可能であること
+- `gh actions-lock` 拡張がインストール済みであること
+  （無ければ `gh extension install github/gh-actions-lock`）
 - `setup.sh` 冒頭の `PR_AUTO_MERGER_PRIVATE_KEY_PATH` と `REPO_HOUSEKEEPER_PRIVATE_KEY_PATH`
   の鍵が読めて空でないこと
 
@@ -47,15 +49,34 @@ Dependabot の minor/patch PR に `auto-merge` ラベルを付与するところ
 上書きせず、`github-actions` の `package-ecosystem` エントリが無ければ、テンプレートの当該
 エントリ（`updates` 配下の 1 ブロック）を既存の `updates` の末尾に追記する。
 
-## ステップ 2: PR を作る
+## ステップ 2: actions.lock を生成
 
-ステップ 1 で置いたファイルを commit して PR を作る。パスを配置したファイルに絞るのは、無関係な
+`gh actions-lock` で、ステップ 1 で置いた workflow が使うアクション（推移的な依存も含む）を
+lock ファイル `.github/workflows/actions.lock` に固定する。`init-*` スキルが言語ごとの workflow と
+一緒に `actions.lock` を作っていれば、そこにステップ 1 の workflow の分が追記される。
+`gh actions-lock` は `.github/workflows/` の全 workflow を対象にするので、まだ lock されていない
+既存の workflow も取り込まれる。既存の workflow が原因で失敗した場合は、PR を作らずにユーザーに
+判断を仰ぐ。
+
+```bash
+gh actions-lock --no-narrow
+```
+
+`--no-narrow` は必須。付けないと `uses: actions/checkout@<SHA> # v7.0.1` が
+`uses: actions/checkout@v7.0.1` のようにタグ表記へ書き換えられ、zizmor の `unpinned-uses`
+（`uses:` を commit SHA で書くことを求める）に引っかかる。`--no-narrow` を付ければ workflow
+ファイルには手を付けず、SHA（とバージョンのコメント）を書いたまま `actions.lock` だけが作られる。
+
+## ステップ 3: PR を作る
+
+ステップ 1・2 で置いたファイルを commit して PR を作る。パスを配置したファイルに絞るのは、無関係な
 作業中の変更を巻き込まないため（上の表を変えたらここも合わせる）。
 
 ```bash
 set -euo pipefail
 git switch -c ci/setup-github-workflows
 git add .github/dependabot.yml \
+  .github/workflows/actions.lock \
   .github/workflows/workflow-lint.yml \
   .github/workflows/dependabot-auto-label.yml
 # public の場合のみ
@@ -65,15 +86,15 @@ git push -u origin ci/setup-github-workflows
 gh pr create --fill
 ```
 
-## ステップ 3: ユーザーにレビューとマージを依頼する
+## ステップ 4: ユーザーにレビューとマージを依頼する
 
 PR の URL を伝えてレビューとマージを依頼し、`AskUserQuestion` でマージが済んだかを聞く。
 `gh` のポーリングでは待たない。
 
-## ステップ 4: GitHub 側のセットアップ
+## ステップ 5: GitHub 側のセットアップ
 
 `setup.sh` を実行して、ブランチ保護・ラベル・secret・Dependabot 有効化などを構成する。
-ステップ 2 のチェックアウトで実行する（`setup.sh` はそこにいる場合だけ、`--repo` の指定が
+ステップ 3 のチェックアウトで実行する（`setup.sh` はそこにいる場合だけ、`--repo` の指定が
 今いるリポジトリと一致することを確認できる）。
 
 ```bash
@@ -106,6 +127,7 @@ git switch main && git pull --ff-only
 | `auto-merge.yml` | `auto-merge` ラベルが付いた PR を自動で approve & auto-merge する |
 | `dependabot-auto-label.yml` | Dependabot の minor / patch 更新 PR に `auto-merge` ラベルを自動付与する |
 | `dependabot.yml` | GitHub Actions の依存を週次で更新する |
+| `actions.lock` | テンプレートではなくステップ 2 で生成する。workflow が使うアクションを推移的な依存まで commit SHA で固定する |
 | `setup.sh` | プロジェクト共通の GitHub 側設定（ブランチ保護・ラベル・secret など） |
 | `add-required-checks.sh` | ruleset を作成 / required status checks を追記する |
 
