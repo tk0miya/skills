@@ -13,12 +13,17 @@ TypeScript プロジェクトの初期セットアップを自動化するスキ
 
 ### 実行環境
 
-以下を実行し、`gh` が認証済みか、`node` が利用可能かをチェックする。
+以下を実行し、`gh` が認証済みか、`gh actions-lock` 拡張があるか、`node` が利用可能かをチェックする。
 
 ```bash
 gh auth status
+gh actions-lock --version
 node --version
 ```
+
+`gh actions-lock` は Phase 3 のコミット前に `actions.lock` を生成するのに使う。
+無ければ `gh extension install github/gh-actions-lock` を案内して中断する（Phase 1・2 でファイルを
+生成し終えてから止まらないよう、ここで確かめる）。
 
 ### カレントディレクトリの状況
 
@@ -249,6 +254,14 @@ chmod +x .claude/hooks/*.sh
 セルフレビューがコミット粒度の分割を指摘した場合は、その指摘だけ採用せずにコミットする
 （粒度以外の指摘には通常どおり対応する）。
 
+コミットの前に `gh actions-lock --no-narrow` を実行し、Phase 2 で置いた workflow が使うアクションを
+`.github/workflows/actions.lock` に固定して同じコミットに含める（workflow を足すコミットと
+その lock は分けない）。`--no-narrow` は必須で、付けないと workflow ファイル中の SHA 固定の `uses:` が
+タグ表記に書き換えられ、zizmor の `unpinned-uses` に引っかかる。既に `actions.lock` があれば
+新しい workflow の分が追記される。`gh actions-lock` は `.github/workflows/` の全 workflow を
+対象にするので、既存の workflow も lock に取り込まれる。既存の workflow が原因で失敗した場合は、
+コミットせずにユーザーに判断を仰ぐ。
+
 分岐するのは**コミットが 1 つでもあるか**（`git rev-parse --verify -q HEAD`）。手動で `npm init` を
 実行しただけのディレクトリは履歴が無く、`git status` には雛形がまるごと並ぶ。この場合はブランチも
 初回コミットもこのスキルが作るので、既存ファイルごと 1 つ目のコミットに含めてよい:
@@ -256,6 +269,7 @@ chmod +x .claude/hooks/*.sh
 ```bash
 set -e
 [[ -e .git ]] || git init
+gh actions-lock --no-narrow
 git add -A
 git diff --cached --quiet || git commit -m "Initial commit"
 [[ "$(git symbolic-ref -q --short HEAD)" == "main" ]] || git branch -m main   # ワークフローが main 固定
@@ -282,6 +296,7 @@ git status --porcelain
 
 ```bash
 set -e
+gh actions-lock --no-narrow
 git add -A
 git diff --cached --quiet || git commit -m "Set up the TypeScript project tooling"
 ```

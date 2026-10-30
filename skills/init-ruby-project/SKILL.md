@@ -13,12 +13,17 @@ Ruby プロジェクトの初期セットアップを自動化するスキルで
 
 ### 実行環境
 
-以下を実行し、`gh` が認証済みか、Bundler が 4.0.13 以降かをチェックする。
+以下を実行し、`gh` が認証済みか、`gh actions-lock` 拡張があるか、Bundler が 4.0.13 以降かをチェックする。
 
 ```bash
 gh auth status
+gh actions-lock --version
 bundle --version
 ```
+
+`gh actions-lock` は Phase 3 のコミット前に `actions.lock` を生成するのに使う。
+無ければ `gh extension install github/gh-actions-lock` を案内して中断する（Phase 1・2 でファイルを
+生成し終えてから止まらないよう、ここで確かめる）。
 
 4.0.13 未満の Bundler は Phase 1 で付与する `cooldown`（公開直後の gem を一定期間使わない
 供給チェーン対策）を**黙って無視する**ため、cooldown の効かないプロジェクトができあがる。
@@ -317,6 +322,14 @@ chmod +x .claude/hooks/*.sh
 セルフレビューがコミット粒度の分割を指摘した場合は、その指摘だけ採用せずにコミットする
 （粒度以外の指摘には通常どおり対応する）。
 
+コミットの前に `gh actions-lock --no-narrow` を実行し、Phase 2 で置いた workflow が使うアクションを
+`.github/workflows/actions.lock` に固定して同じコミットに含める（workflow を足すコミットと
+その lock は分けない）。`--no-narrow` は必須で、付けないと workflow ファイル中の SHA 固定の `uses:` が
+タグ表記に書き換えられ、zizmor の `unpinned-uses` に引っかかる。既に `actions.lock` があれば
+新しい workflow の分が追記される。`gh actions-lock` は `.github/workflows/` の全 workflow を
+対象にするので、既存の workflow も lock に取り込まれる。既存の workflow が原因で失敗した場合は、
+コミットせずにユーザーに判断を仰ぐ。
+
 gemspec の `summary` / `homepage` など、および `bundle gem` の README に残る TODO は、gem の中身が
 決まってから書くものなのでこの時点では埋めない。セルフレビューが雛形の TODO の残骸を指摘した場合も、
 その指摘だけ採用しない。
@@ -328,6 +341,7 @@ gemspec の `summary` / `homepage` など、および `bundle gem` の README �
 ```bash
 set -e
 [[ -e .git ]] || git init
+gh actions-lock --no-narrow
 git add -A
 git diff --cached --quiet || git commit -m "Initial commit"
 [[ "$(git symbolic-ref -q --short HEAD)" == "main" ]] || git branch -m main   # ワークフローが main 固定
@@ -354,6 +368,7 @@ git status --porcelain
 
 ```bash
 set -e
+gh actions-lock --no-narrow
 git add -A
 git diff --cached --quiet || git commit -m "Set up the Ruby project tooling"
 ```

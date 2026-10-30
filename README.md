@@ -42,6 +42,8 @@ leaving the project free to grow into either a command or a library.
 
 Delegates the language-agnostic GitHub setup to `setup-github-workflows` and the general
 development workflow hooks to `setup-dev-workflow-hooks`, both of which must also be installed.
+Locks the actions used by the workflows in `.github/workflows/actions.lock`, which requires the
+[gh-actions-lock](https://github.com/github/gh-actions-lock) extension.
 
 ### init-ruby-project
 
@@ -61,6 +63,8 @@ project that is partly set up. It does not scaffold: run `bundle gem` yourself f
 
 Delegates the language-agnostic GitHub setup to `setup-github-workflows` and the general
 development workflow hooks to `setup-dev-workflow-hooks`, both of which must also be installed.
+Locks the actions used by the workflows in `.github/workflows/actions.lock`, which requires the
+[gh-actions-lock](https://github.com/github/gh-actions-lock) extension.
 
 ### init-typescript-project
 
@@ -76,6 +80,8 @@ Sets up the following automatically:
 
 Delegates the language-agnostic GitHub setup to `setup-github-workflows` and the general
 development workflow hooks to `setup-dev-workflow-hooks`, both of which must also be installed.
+Locks the actions used by the workflows in `.github/workflows/actions.lock`, which requires the
+[gh-actions-lock](https://github.com/github/gh-actions-lock) extension.
 
 ### setup-dev-workflow-hooks
 
@@ -89,6 +95,6 @@ Single source of truth for code-review perspectives. Just before committing, it 
 
 ### setup-github-workflows
 
-Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), the `github-actions` Dependabot update config (merged into an existing `dependabot.yml` if present), branch protection, and the project-wide GitHub App credentials for a repository. Run it once per repository, right after creating and pushing it.
+Sets up language-agnostic GitHub Actions workflows (workflow-lint, auto-merge, Dependabot auto-label), their `actions.lock` entries, the `github-actions` Dependabot update config (merged into an existing `dependabot.yml` if present), branch protection, and the project-wide GitHub App credentials for a repository. Run it once per repository, right after creating and pushing it. Requires the [gh-actions-lock](https://github.com/github/gh-actions-lock) extension.
 
 This is the single source of truth for that setup: the `init-*` skills delegate to it rather than setting it up themselves. Each side registers its own status checks into the same `main` ruleset, which is created by whichever call reaches it first.
