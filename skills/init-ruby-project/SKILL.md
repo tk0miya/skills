@@ -322,13 +322,11 @@ chmod +x .claude/hooks/*.sh
 セルフレビューがコミット粒度の分割を指摘した場合は、その指摘だけ採用せずにコミットする
 （粒度以外の指摘には通常どおり対応する）。
 
-コミットの前に `gh actions-lock --no-narrow` を実行し、Phase 2 で置いた workflow が使うアクションを
+コミットの前に `gh actions-lock` を実行し、Phase 2 で置いた workflow が使うアクションを
 `.github/workflows/actions.lock` に固定して同じコミットに含める（workflow を足すコミットと
-その lock は分けない）。`--no-narrow` は必須で、付けないと workflow ファイル中の SHA 固定の `uses:` が
-タグ表記に書き換えられ、zizmor の `unpinned-uses` に引っかかる。既に `actions.lock` があれば
-新しい workflow の分が追記される。`gh actions-lock` は `.github/workflows/` の全 workflow を
-対象にするので、既存の workflow も lock に取り込まれる。既存の workflow が原因で失敗した場合は、
-コミットせずにユーザーに判断を仰ぐ。
+その lock は分けない）。既に `actions.lock` があれば新しい workflow の分が追記される。
+`gh actions-lock` は `.github/workflows/` の全 workflow を対象にするので、既存の workflow も lock に
+取り込まれる。既存の workflow が原因で失敗した場合は、コミットせずにユーザーに判断を仰ぐ。
 
 gemspec の `summary` / `homepage` など、および `bundle gem` の README に残る TODO は、gem の中身が
 決まってから書くものなのでこの時点では埋めない。セルフレビューが雛形の TODO の残骸を指摘した場合も、
@@ -341,7 +339,7 @@ gemspec の `summary` / `homepage` など、および `bundle gem` の README �
 ```bash
 set -e
 [[ -e .git ]] || git init
-gh actions-lock --no-narrow
+gh actions-lock
 git add -A
 git diff --cached --quiet || git commit -m "Initial commit"
 [[ "$(git symbolic-ref -q --short HEAD)" == "main" ]] || git branch -m main   # ワークフローが main 固定
@@ -368,7 +366,7 @@ git status --porcelain
 
 ```bash
 set -e
-gh actions-lock --no-narrow
+gh actions-lock
 git add -A
 git diff --cached --quiet || git commit -m "Set up the Ruby project tooling"
 ```

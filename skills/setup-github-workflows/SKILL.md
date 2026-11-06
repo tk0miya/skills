@@ -59,13 +59,8 @@ lock ファイル `.github/workflows/actions.lock` に固定する。`init-*` �
 判断を仰ぐ。
 
 ```bash
-gh actions-lock --no-narrow
+gh actions-lock
 ```
-
-`--no-narrow` は必須。付けないと `uses: actions/checkout@<SHA> # v7.0.1` が
-`uses: actions/checkout@v7.0.1` のようにタグ表記へ書き換えられ、zizmor の `unpinned-uses`
-（`uses:` を commit SHA で書くことを求める）に引っかかる。`--no-narrow` を付ければ workflow
-ファイルには手を付けず、SHA（とバージョンのコメント）を書いたまま `actions.lock` だけが作られる。
 
 ## ステップ 3: PR を作る
 
